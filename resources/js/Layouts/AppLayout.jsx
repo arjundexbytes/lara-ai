@@ -1,5 +1,6 @@
 import React from 'react';
 import NotificationCenter from '@/Components/NotificationCenter';
+import ConnectionStatusButton from '@/Components/Status/ConnectionStatusButton';
 
 const links = [
   ['Dashboard', '/dashboard'],
@@ -15,19 +16,31 @@ const links = [
 
 export default function AppLayout({ title, children }) {
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-800 transition-colors duration-300">
+    <div className="min-h-screen bg-slate-100 text-slate-800">
       <NotificationCenter />
-      <header className="border-b bg-white px-6 py-4 shadow-sm">
-        <h1 className="text-xl font-semibold">{title}</h1>
-        <nav className="mt-3 flex flex-wrap gap-3 text-sm">
-          {links.map(([label, href]) => (
-            <a key={href} href={href} className="rounded border px-2 py-1 transition hover:-translate-y-0.5 hover:bg-slate-100">
-              {label}
-            </a>
-          ))}
-        </nav>
-      </header>
-      <main className="mx-auto max-w-7xl p-6">{children}</main>
+      <div className="mx-auto grid min-h-screen max-w-[1400px] grid-cols-1 lg:grid-cols-[240px_1fr]">
+        <aside className="border-r bg-slate-900 p-4 text-slate-100">
+          <div className="mb-6 text-lg font-semibold">Enterprise AI</div>
+          <nav className="space-y-2 text-sm">
+            {links.map(([label, href]) => (
+              <a key={href} href={href} className="block rounded px-3 py-2 transition hover:bg-slate-800">
+                {label}
+              </a>
+            ))}
+          </nav>
+        </aside>
+
+        <section>
+          <header className="flex flex-wrap items-center justify-between gap-4 border-b bg-white px-6 py-4 shadow-sm">
+            <h1 className="text-xl font-semibold">{title}</h1>
+            <div className="flex items-center gap-3">
+              <ConnectionStatusButton />
+              <a href="/users" className="rounded border px-3 py-2 text-sm">Profile</a>
+            </div>
+          </header>
+          <main className="p-5">{children}</main>
+        </section>
+      </div>
     </div>
   );
 }

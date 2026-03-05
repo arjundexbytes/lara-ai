@@ -11,6 +11,7 @@ use App\Services\Query\AIQueryExecutor;
 use App\Services\Query\AIQueryParser;
 use App\Services\Serialization\ApiResponseFormatter;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use Throwable;
 
@@ -26,6 +27,7 @@ class ConsolidatedAIController extends Controller
 
     public function query(AIQueryRequest $request): JsonResponse
     {
+        $startedAt = microtime(true);
         $intent = new AIIntentDTO(
             query: $request->string('query')->value(),
             format: $request->string('format', 'json')->value(),
@@ -39,8 +41,11 @@ class ConsolidatedAIController extends Controller
             $result = $this->queryExecutor->execute($parsed, $request->user());
             $result['cost'] = $this->costService->estimate($intent, $result);
 
+            $this->trackMetrics($startedAt, false);
+
             return $this->responseFormatter->json($result, $intent->format);
         } catch (Throwable $throwable) {
+            $this->trackMetrics($startedAt, true);
             Log::error('AI query failed', [
                 'conversation_id' => $intent->conversationId,
                 'error' => $throwable->getMessage(),
@@ -51,5 +56,19 @@ class ConsolidatedAIController extends Controller
                 'conversation_id' => $intent->conversationId,
             ], 422);
         }
+    }
+
+    private function trackMetrics(float $startedAt, bool $isError): void
+    {
+        $latency = (microtime(true) - $startedAt) * 1000;
+        $count = (int) Cache::increment('ai:request_count:today');
+
+        if ($isError) {
+            Cache::increment('ai:error_count:today');
+        }
+
+        $currentAvg = (float) Cache::get('ai:latency_avg_ms', 0);
+        $nextAvg = $count <= 1 ? $latency : (($currentAvg * ($count - 1)) + $latency) / $count;
+        Cache::put('ai:latency_avg_ms', round($nextAvg, 2), now()->endOfDay());
     }
 }

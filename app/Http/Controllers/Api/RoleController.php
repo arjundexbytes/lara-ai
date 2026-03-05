@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\AssignPermissionsRequest;
+use App\Http\Requests\UpsertRoleRequest;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Spatie\Permission\Models\Permission;
@@ -12,24 +14,28 @@ class RoleController extends Controller
 {
     public function index(Request $request): JsonResponse
     {
-        $q = (string) $request->query('q', '');
-        $roles = Role::query()->when($q !== '', fn ($query) => $query->where('name', 'like', "%$q%"))->paginate(10);
+        $q = trim((string) $request->query('q', ''));
+        $perPage = max(1, min(50, (int) $request->query('per_page', 10)));
+
+        $roles = Role::query()
+            ->with('permissions:id,name')
+            ->when($q !== '', fn ($query) => $query->where('name', 'like', "%$q%"))
+            ->orderBy('name')
+            ->paginate($perPage);
 
         return response()->json($roles);
     }
 
-    public function store(Request $request): JsonResponse
+    public function store(UpsertRoleRequest $request): JsonResponse
     {
-        $validated = $request->validate(['name' => ['required', 'string', 'max:100']]);
-        $role = Role::findOrCreate($validated['name'], 'web');
+        $role = Role::findOrCreate($request->validated('name'), 'web');
 
         return response()->json($role, 201);
     }
 
-    public function update(Request $request, Role $role): JsonResponse
+    public function update(UpsertRoleRequest $request, Role $role): JsonResponse
     {
-        $validated = $request->validate(['name' => ['required', 'string', 'max:100']]);
-        $role->update(['name' => $validated['name']]);
+        $role->update(['name' => $request->validated('name')]);
 
         return response()->json($role);
     }
@@ -41,10 +47,9 @@ class RoleController extends Controller
         return response()->json(['deleted' => true]);
     }
 
-    public function syncPermissions(Request $request, Role $role): JsonResponse
+    public function syncPermissions(AssignPermissionsRequest $request, Role $role): JsonResponse
     {
-        $validated = $request->validate(['permissions' => ['array']]);
-        $permissions = Permission::query()->whereIn('name', $validated['permissions'] ?? [])->pluck('name')->toArray();
+        $permissions = Permission::query()->whereIn('name', $request->validated('permissions'))->pluck('name')->toArray();
         $role->syncPermissions($permissions);
 
         return response()->json(['synced' => true, 'permissions' => $permissions]);

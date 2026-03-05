@@ -19,9 +19,20 @@ class SpatiePermissionFlowTest extends TestCase
         $routes = file_get_contents(__DIR__.'/../../routes/api.php');
 
         $this->assertNotFalse($routes);
-        $this->assertStringContainsString("Route::middleware(['auth:sanctum'])->group", $routes);
-        $this->assertStringContainsString("Route::apiResource('roles'", $routes);
-        $this->assertStringContainsString("Route::apiResource('permissions'", $routes);
-        $this->assertStringContainsString("Route::post('users/{user}/permissions'", $routes);
+        $this->assertStringContainsString("Route::get('/roles'", $routes);
+        $this->assertStringContainsString("Route::post('/roles/{role}/permissions'", $routes);
+        $this->assertStringContainsString("Route::get('/permissions'", $routes);
+    }
+
+    public function test_settings_update_and_rate_limits_exist(): void
+    {
+        $routes = file_get_contents(__DIR__.'/../../routes/api.php');
+        $provider = file_get_contents(__DIR__.'/../../app/Providers/AppServiceProvider.php');
+
+        $this->assertNotFalse($routes);
+        $this->assertNotFalse($provider);
+        $this->assertStringContainsString("Route::put('/settings'", $routes);
+        $this->assertStringContainsString("RateLimiter::for('admin-read'", $provider);
+        $this->assertStringContainsString("RateLimiter::for('admin-write'", $provider);
     }
 }

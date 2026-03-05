@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\UpsertPermissionRequest;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Spatie\Permission\Models\Permission;
@@ -11,24 +12,27 @@ class PermissionController extends Controller
 {
     public function index(Request $request): JsonResponse
     {
-        $q = (string) $request->query('q', '');
-        $permissions = Permission::query()->when($q !== '', fn ($query) => $query->where('name', 'like', "%$q%"))->paginate(10);
+        $q = trim((string) $request->query('q', ''));
+        $perPage = max(1, min(50, (int) $request->query('per_page', 10)));
+
+        $permissions = Permission::query()
+            ->when($q !== '', fn ($query) => $query->where('name', 'like', "%$q%"))
+            ->orderBy('name')
+            ->paginate($perPage);
 
         return response()->json($permissions);
     }
 
-    public function store(Request $request): JsonResponse
+    public function store(UpsertPermissionRequest $request): JsonResponse
     {
-        $validated = $request->validate(['name' => ['required', 'string', 'max:100']]);
-        $permission = Permission::findOrCreate($validated['name'], 'web');
+        $permission = Permission::findOrCreate($request->validated('name'), 'web');
 
         return response()->json($permission, 201);
     }
 
-    public function update(Request $request, Permission $permission): JsonResponse
+    public function update(UpsertPermissionRequest $request, Permission $permission): JsonResponse
     {
-        $validated = $request->validate(['name' => ['required', 'string', 'max:100']]);
-        $permission->update(['name' => $validated['name']]);
+        $permission->update(['name' => $request->validated('name')]);
 
         return response()->json($permission);
     }
