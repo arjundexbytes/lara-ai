@@ -10,6 +10,7 @@ export const APP_ROUTES = {
   settings: '/settings',
   uploads: '/uploads',
   horizon: '/horizon',
+  subscription: '/subscription',
 };
 
 export const API_ENDPOINTS = {
@@ -25,6 +26,8 @@ export const API_ENDPOINTS = {
   systemStatus: '/api/system/status',
   uploads: '/api/uploads',
   horizonMetrics: '/api/horizon/metrics',
+  subscriptions: '/api/subscriptions',
+  checkoutSession: '/api/payments/checkout-session',
 };
 
 export const DEFAULT_PAGE_SIZE = 10;

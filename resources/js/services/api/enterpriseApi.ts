@@ -48,6 +48,12 @@ export const enterpriseApi = {
   updateCampaign: (id: number | string, payload: { name: string; status: string; description?: string; metadata?: Record<string, unknown> }) => apiClient.put(`/campaigns/${id}`, payload).then((r) => r.data),
   deleteCampaign: (id: number | string) => apiClient.delete(`/campaigns/${id}`).then((r) => r.data),
 
+
+  getSubscriptions: () => apiClient.get('/subscriptions').then((r) => r.data),
+  changeSubscription: (plan_id: number | string) => apiClient.post('/subscriptions/change', { plan_id }).then((r) => r.data),
+  cancelSubscription: () => apiClient.post('/subscriptions/cancel').then((r) => r.data),
+  createCheckoutSession: (payload: { plan_id: number | string; success_url: string; cancel_url: string }) => apiClient.post('/payments/checkout-session', payload).then((r) => r.data),
+
   getSettings: () => apiClient.get('/settings').then((r) => r.data),
   updateSettings: (payload: { ai_provider: string; vector_driver: string; rag_top_k: number; active_vector_db: string; llm_provider: string }) => apiClient.put('/settings', payload).then((r) => r.data),
 };

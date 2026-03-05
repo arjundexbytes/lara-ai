@@ -30,5 +30,9 @@ export const apiService = {
   documents: (params: Record<string, unknown>) => request(() => client.get(API_ENDPOINTS.documents, { params })),
   settings: () => request(() => client.get(API_ENDPOINTS.settings)),
   updateSettings: (payload: { ai_provider: string; vector_driver: string; rag_top_k: number }) => request(() => client.put(API_ENDPOINTS.settings, payload)),
+  subscriptions: () => request(() => client.get(API_ENDPOINTS.subscriptions)),
+  changeSubscription: (planId: number | string) => request(() => client.post('/api/subscriptions/change', { plan_id: planId })),
+  cancelSubscription: () => request(() => client.post('/api/subscriptions/cancel')),
+  checkoutSession: (payload: { plan_id: number | string; success_url: string; cancel_url: string }) => request(() => client.post(API_ENDPOINTS.checkoutSession, payload)),
   askAI: (query: string, conversationId: string) => request(() => client.post(API_ENDPOINTS.aiQuery, { query: requireString(query, 'query'), conversation_id: requireString(conversationId, 'conversation_id'), format: 'json' })),
 };

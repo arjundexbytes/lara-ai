@@ -49,6 +49,8 @@ Enterprise-grade Laravel 12 AI system with secure backend orchestration, MCP mem
 - `GET /api/products`, `GET /api/orders`, `GET /api/documents`, `GET /api/chats`
 - `GET /api/campaigns`, `POST /api/campaigns`, `PUT /api/campaigns/{campaign}`, `DELETE /api/campaigns/{campaign}`
 - `GET /api/uploads`, `POST /api/uploads`, `DELETE /api/uploads/{upload}`
+- `GET /api/subscriptions`, `POST /api/subscriptions/change`, `POST /api/subscriptions/cancel`
+- `POST /api/payments/checkout-session`, `POST /api/payments/webhook`
 
 ## Setup
 ```bash

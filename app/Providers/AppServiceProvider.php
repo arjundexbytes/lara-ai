@@ -38,5 +38,15 @@ class AppServiceProvider extends ServiceProvider
 
             return Limit::perMinute(45)->by('admin-write:'.$key);
         });
+
+        RateLimiter::for('payment-write', function (Request $request): Limit {
+            $key = $request->user()?->getAuthIdentifier() ?: $request->ip();
+
+            return Limit::perMinute(20)->by('payment-write:'.$key);
+        });
+
+        RateLimiter::for('payment-webhook', function (Request $request): Limit {
+            return Limit::perMinute(120)->by('payment-webhook:'.$request->ip());
+        });
     }
 }

@@ -19,5 +19,7 @@ Route::middleware(['auth'])->group(function (): void {
     Route::get('/campaigns', fn () => Inertia::render('Campaigns/Index'))->middleware('can:manage campaigns');
     Route::get('/uploads', fn () => Inertia::render('Uploads/Index'))->middleware('can:query ai');
     Route::get('/horizon', fn () => Inertia::render('Horizon/Index'))->middleware('can:manage settings');
+    Route::get('/subscription', fn () => Inertia::render('Subscription/Index'))->middleware('can:query ai');
+    Route::get('/profile', fn () => Inertia::render('Auth/Profile'))->middleware('can:query ai');
     Route::get('/chat', fn () => Inertia::render('Chat/Index'))->middleware('can:query ai');
 });

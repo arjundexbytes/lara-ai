@@ -18,6 +18,9 @@ class UserSeeder extends Seeder
             'manage users',
             'view analytics',
             'query ai',
+            'manage settings',
+            'manage campaigns',
+            'manage uploads',
         ];
 
         foreach ($permissions as $permission) {
@@ -29,7 +32,7 @@ class UserSeeder extends Seeder
         }
 
         Role::findByName('admin')->syncPermissions($permissions);
-        Role::findByName('manager')->syncPermissions(['manage users', 'view analytics', 'query ai']);
+        Role::findByName('manager')->syncPermissions(['manage users', 'view analytics', 'query ai', 'manage campaigns']);
         Role::findByName('analyst')->syncPermissions(['view analytics', 'query ai']);
 
         $admin = User::query()->create(['name' => 'Admin User', 'email' => 'admin@example.com', 'password' => bcrypt('password')]);

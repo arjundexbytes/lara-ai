@@ -7,6 +7,7 @@ use Database\Seeders\Samples\ChatSeeder;
 use Database\Seeders\Samples\OrderSeeder;
 use Database\Seeders\Samples\ProductSeeder;
 use Database\Seeders\Samples\UserSeeder;
+use Database\Seeders\Samples\PlanSeeder;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
@@ -18,6 +19,7 @@ class DatabaseSeeder extends Seeder
             ProductSeeder::class,
             OrderSeeder::class,
             ChatSeeder::class,
+            PlanSeeder::class,
         ]);
 
         Document::query()->insert([

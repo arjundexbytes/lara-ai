@@ -59,6 +59,7 @@ export default function SettingsIndex() {
       <div className="mb-3 flex gap-2">
         <Button variant={activeTab === 'config' ? 'primary' : 'info'} onClick={() => setActiveTab('config')}>Config</Button>
         <Button variant={activeTab === 'runtime' ? 'primary' : 'info'} onClick={() => setActiveTab('runtime')}>Runtime</Button>
+        <Button variant={activeTab === 'payment' ? 'primary' : 'info'} onClick={() => setActiveTab('payment')}>Payment/Plan</Button>
       </div>
 
       <div className="rounded border bg-white p-4">
@@ -94,7 +95,7 @@ export default function SettingsIndex() {
                   </select>
                 </label>
               </>
-            ) : (
+            ) : activeTab === 'runtime' ? (
               <>
                 <label className="grid gap-1">RAG Top K
                   <input type="number" min="1" max="20" value={form.rag_top_k} onChange={(e) => setForm((f) => ({ ...f, rag_top_k: Number(e.target.value) }))} className="rounded border px-3 py-2" />
@@ -104,6 +105,11 @@ export default function SettingsIndex() {
                 <div>Redis Host: <strong>{settings.redis_host}</strong></div>
                 <div>DB Connection: <strong>{settings.db_connection}</strong></div>
               </>
+            ) : (
+              <div className="col-span-full rounded border border-blue-200 bg-blue-50 p-3 text-sm">
+                Manage plan pricing, current subscription, and payment provider workflows in the Subscription page.
+                <a href="/subscription" className="ml-2 font-semibold text-blue-700 underline">Open Subscription Management</a>
+              </div>
             )}
 
             {canManage ? <Button loading={saving} type="submit" className="col-span-full">Save Settings</Button> : null}

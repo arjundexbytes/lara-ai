@@ -19,6 +19,7 @@ const links = [
   ['Campaigns', '/campaigns'],
   ['Uploads', '/uploads'],
   ['Horizon', '/horizon'],
+  ['Subscription', '/subscription'],
 ];
 
 export default function AppLayout({ title, children }) {
@@ -64,7 +65,8 @@ export default function AppLayout({ title, children }) {
                 </button>
                 {menuOpen ? (
                   <div className="absolute right-0 z-20 mt-2 w-44 rounded border bg-white p-1 shadow" role="menu">
-                    <a href="/users" className="block rounded px-3 py-2 text-sm hover:bg-slate-100" role="menuitem">Users</a>
+                    <a href="/profile" className="block rounded px-3 py-2 text-sm hover:bg-slate-100" role="menuitem">Profile</a>
+                    <a href="/subscription" className="block rounded px-3 py-2 text-sm hover:bg-slate-100" role="menuitem">Plan</a>
                     <a href="/settings" className="block rounded px-3 py-2 text-sm hover:bg-slate-100" role="menuitem">Settings</a>
                   </div>
                 ) : null}

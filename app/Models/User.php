@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Laravel\Scout\Searchable;
 use Spatie\Permission\Traits\HasRoles;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class User extends Authenticatable
 {
@@ -26,4 +28,16 @@ class User extends Authenticatable
             'roles' => $this->roles->pluck('name')->toArray(),
         ];
     }
+
+
+    public function subscriptions(): HasMany
+    {
+        return $this->hasMany(UserSubscription::class);
+    }
+
+    public function activeSubscription(): HasOne
+    {
+        return $this->hasOne(UserSubscription::class)->where('status', 'active')->latestOfMany();
+    }
+
 }
