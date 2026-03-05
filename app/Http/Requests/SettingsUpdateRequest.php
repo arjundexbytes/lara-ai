@@ -17,6 +17,8 @@ class SettingsUpdateRequest extends FormRequest
             'ai_provider' => ['required', 'in:ollama,openai'],
             'vector_driver' => ['required', 'in:meilisearch,database'],
             'rag_top_k' => ['required', 'integer', 'min:1', 'max:20'],
+            'active_vector_db' => ['required', 'string', 'max:120'],
+            'llm_provider' => ['required', 'in:ollama,openai,anthropic'],
         ];
     }
 }

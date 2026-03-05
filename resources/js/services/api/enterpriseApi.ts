@@ -37,6 +37,13 @@ export const enterpriseApi = {
   getDocuments: (params: Record<string, unknown>) => apiClient.get('/documents', { params }).then((r) => r.data),
   getChats: (params: Record<string, unknown>) => apiClient.get('/chats', { params }).then((r) => r.data),
 
+
+  getVectorDatabases: () => apiClient.get('/vector-databases').then((r) => r.data),
+  getCampaigns: (params: Record<string, unknown>) => apiClient.get('/campaigns', { params }).then((r) => r.data),
+  createCampaign: (payload: { name: string; status: string; description?: string; metadata?: Record<string, unknown> }) => apiClient.post('/campaigns', payload).then((r) => r.data),
+  updateCampaign: (id: number | string, payload: { name: string; status: string; description?: string; metadata?: Record<string, unknown> }) => apiClient.put(`/campaigns/${id}`, payload).then((r) => r.data),
+  deleteCampaign: (id: number | string) => apiClient.delete(`/campaigns/${id}`).then((r) => r.data),
+
   getSettings: () => apiClient.get('/settings').then((r) => r.data),
-  updateSettings: (payload: { ai_provider: string; vector_driver: string; rag_top_k: number }) => apiClient.put('/settings', payload).then((r) => r.data),
+  updateSettings: (payload: { ai_provider: string; vector_driver: string; rag_top_k: number; active_vector_db: string; llm_provider: string }) => apiClient.put('/settings', payload).then((r) => r.data),
 };

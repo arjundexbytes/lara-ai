@@ -29,7 +29,7 @@ Enterprise-grade Laravel 12 AI system with secure backend orchestration, MCP mem
 - Scout vector retrieval includes Eloquent fallback path for resilience.
 
 ## Frontend pages
-- Sidebar: Dashboard, Chat, Users, Products, Orders, Documents, Settings, Roles, Permissions.
+- Sidebar: Dashboard, Chat, Users, Products, Orders, Documents, Settings, Roles, Permissions, Vector DB, Campaigns.
 - Top bar: live connection check, notifications, profile shortcut.
 - Chat: multi-turn view with latest-first cards, typing loader, sticky input, JSON/text adaptive rendering.
 - Users/Roles/Permissions/Settings: loaders, modal workflows, and async action feedback.
@@ -40,11 +40,13 @@ Enterprise-grade Laravel 12 AI system with secure backend orchestration, MCP mem
 - `GET /api/dashboard/metrics`
 - `GET /api/settings`
 - `PUT /api/settings`
+- `GET /api/vector-databases`
 - `GET /api/analytics`
 - `GET /api/users`, `GET /api/users/{user}/profile`, `POST /api/users/{user}/permissions`, `DELETE /api/users/{user}`
 - `GET /api/roles`, `POST /api/roles`, `PUT /api/roles/{role}`, `DELETE /api/roles/{role}`, `POST /api/roles/{role}/permissions`
 - `GET /api/permissions`, `POST /api/permissions`, `PUT /api/permissions/{permission}`, `DELETE /api/permissions/{permission}`
 - `GET /api/products`, `GET /api/orders`, `GET /api/documents`, `GET /api/chats`
+- `GET /api/campaigns`, `POST /api/campaigns`, `PUT /api/campaigns/{campaign}`, `DELETE /api/campaigns/{campaign}`
 
 ## Setup
 ```bash
@@ -82,3 +84,8 @@ These map to conversation reliability, error rates, and AI response performance 
 ## Automation test assets
 - Playwright hybrid test: `tests/e2e/ai-engine.spec.ts`
 - Postman collection/environment: `postman/`
+
+
+## Queue recommendations
+- Use `QUEUE_CONNECTION=redis` for background AI tasks, vector ingestion, and campaign dispatch jobs.
+- Job scaffolds: `ProcessAIQueryJob`, `IngestVectorDocumentsJob`, `DispatchCampaignJob`.

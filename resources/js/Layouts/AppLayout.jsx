@@ -15,6 +15,8 @@ const links = [
   ['Settings', '/settings'],
   ['Roles', '/roles'],
   ['Permissions', '/permissions'],
+  ['Vector DB', '/vector-dbs'],
+  ['Campaigns', '/campaigns'],
 ];
 
 export default function AppLayout({ title, children }) {

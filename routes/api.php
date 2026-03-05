@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\CampaignController;
 use App\Http\Controllers\Api\ConsolidatedAIController;
 use App\Http\Controllers\Api\DashboardMetricsController;
 use App\Http\Controllers\Api\DataBrowserController;
@@ -8,6 +9,7 @@ use App\Http\Controllers\Api\RoleController;
 use App\Http\Controllers\Api\SettingsController;
 use App\Http\Controllers\Api\SystemStatusController;
 use App\Http\Controllers\Api\UserManagementController;
+use App\Http\Controllers\Api\VectorDatabaseController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth:sanctum', 'role.permission'])->group(function (): void {
@@ -17,6 +19,7 @@ Route::middleware(['auth:sanctum', 'role.permission'])->group(function (): void 
     Route::get('/dashboard/metrics', DashboardMetricsController::class)->middleware('throttle:admin-read');
     Route::get('/settings', SettingsController::class)->middleware('throttle:admin-read');
     Route::put('/settings', [SettingsController::class, 'update'])->middleware(['permission:manage settings', 'throttle:admin-write']);
+    Route::get('/vector-databases', [VectorDatabaseController::class, 'index'])->middleware(['permission:manage settings|view analytics', 'throttle:admin-read']);
     Route::get('/analytics', [DataBrowserController::class, 'analytics'])->middleware('throttle:admin-read');
 
     Route::get('/users', [DataBrowserController::class, 'users'])->middleware('throttle:admin-read');
@@ -39,4 +42,9 @@ Route::middleware(['auth:sanctum', 'role.permission'])->group(function (): void 
     Route::post('/permissions', [PermissionController::class, 'store'])->middleware(['permission:manage permissions', 'throttle:admin-write']);
     Route::put('/permissions/{permission}', [PermissionController::class, 'update'])->middleware(['permission:manage permissions', 'throttle:admin-write']);
     Route::delete('/permissions/{permission}', [PermissionController::class, 'destroy'])->middleware(['permission:manage permissions', 'throttle:admin-write']);
+
+    Route::get('/campaigns', [CampaignController::class, 'index'])->middleware(['permission:manage campaigns|view analytics', 'throttle:admin-read']);
+    Route::post('/campaigns', [CampaignController::class, 'store'])->middleware(['permission:manage campaigns', 'throttle:admin-write']);
+    Route::put('/campaigns/{campaign}', [CampaignController::class, 'update'])->middleware(['permission:manage campaigns', 'throttle:admin-write']);
+    Route::delete('/campaigns/{campaign}', [CampaignController::class, 'destroy'])->middleware(['permission:manage campaigns', 'throttle:admin-write']);
 });
