@@ -2,6 +2,7 @@ import React from 'react';
 import axios from 'axios';
 import { useDispatch, useSelector } from 'react-redux';
 import { setLoading, setStatuses } from '@/store/slices/systemSlice';
+import { pushNotification } from '@/store/slices/notificationSlice';
 
 export default function ConnectionStatusButton() {
   const dispatch = useDispatch();
@@ -12,6 +13,9 @@ export default function ConnectionStatusButton() {
     try {
       const { data } = await axios.get('/api/system/status');
       dispatch(setStatuses({ db: data.db, redis: data.redis, ai: data.ai }));
+      dispatch(pushNotification({ type: 'success', message: 'Connection checks completed.' }));
+    } catch {
+      dispatch(pushNotification({ type: 'error', message: 'Connection check failed.' }));
     } finally {
       dispatch(setLoading(false));
     }

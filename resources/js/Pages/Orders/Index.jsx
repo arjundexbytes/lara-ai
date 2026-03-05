@@ -9,14 +9,22 @@ export default function OrdersIndex() {
   const [page, setPage] = useState(1);
   const [payload, setPayload] = useState(null);
   const [analytics, setAnalytics] = useState(null);
+  const [error, setError] = useState('');
 
   useEffect(() => {
+    let mounted = true;
     setPayload(null);
-    axios.get('/api/orders', { params: { status, page } }).then(({ data }) => setPayload(data));
+    setError('');
+    axios.get('/api/orders', { params: { status, page } })
+      .then(({ data }) => mounted && setPayload(data))
+      .catch(() => mounted && setError('Failed to load orders.'));
+    return () => { mounted = false; };
   }, [status, page]);
 
   useEffect(() => {
-    axios.get('/api/analytics').then(({ data }) => setAnalytics(data));
+    let mounted = true;
+    axios.get('/api/analytics').then(({ data }) => mounted && setAnalytics(data)).catch(() => null);
+    return () => { mounted = false; };
   }, []);
 
   const total = useMemo(() => (payload?.data || []).reduce((sum, o) => sum + Number(o.total), 0), [payload]);
@@ -37,7 +45,8 @@ export default function OrdersIndex() {
           {analytics ? <AnimatedBarChart data={chartData} /> : <div className="h-20 animate-pulse rounded bg-slate-200" />}
         </div>
       </div>
-      {!payload ? <div className="h-16 animate-pulse rounded bg-slate-200" /> : <OrdersTable orders={payload.data} />}
+      {error ? <div className="rounded border border-red-200 bg-red-50 p-3 text-sm text-red-700">{error}</div> : null}
+      {!payload && !error ? <div className="h-16 animate-pulse rounded bg-slate-200" /> : <OrdersTable orders={payload?.data || []} />}
       <div className="mt-3 flex gap-2">
         <button onClick={() => setPage((p) => Math.max(1, p - 1))} className="rounded border px-3 py-1">Prev</button>
         <span className="text-sm">Page {page}</span>

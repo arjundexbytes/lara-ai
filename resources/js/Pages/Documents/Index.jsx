@@ -6,16 +6,22 @@ export default function DocumentsIndex() {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [type, setType] = useState('');
+  const [error, setError] = useState('');
 
   useEffect(() => {
     let mounted = true;
     setLoading(true);
-    axios.get('/api/documents', { params: { file_type: type } }).then(({ data }) => {
-      if (mounted) {
-        setItems(data.data || []);
-        setLoading(false);
-      }
-    });
+    setError('');
+    axios.get('/api/documents', { params: { file_type: type } })
+      .then(({ data }) => {
+        if (mounted) setItems(data.data || []);
+      })
+      .catch(() => {
+        if (mounted) setError('Failed to load documents.');
+      })
+      .finally(() => {
+        if (mounted) setLoading(false);
+      });
 
     return () => {
       mounted = false;
@@ -38,6 +44,8 @@ export default function DocumentsIndex() {
           <div className="h-12 animate-pulse rounded bg-slate-200" />
           <div className="h-12 animate-pulse rounded bg-slate-200" />
         </div>
+      ) : error ? (
+        <div className="rounded border border-red-200 bg-red-50 p-3 text-sm text-red-700">{error}</div>
       ) : (
         <div className="grid gap-3 md:grid-cols-2">
           {items.map((doc) => (
