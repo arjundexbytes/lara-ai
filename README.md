@@ -1,39 +1,40 @@
-# Laravel 12 Enterprise AI Platform Skeleton
+# Laravel 12 Enterprise AI Platform
 
-Enterprise-grade Laravel 12 skeleton for AI-assisted analytics, secure API delivery, and scalable RAG orchestration.
+Enterprise-grade Laravel 12 AI system skeleton with secure backend orchestration, MCP memory context, RAG retrieval, and animated Inertia/React frontend.
 
 ## Core stack
 - Laravel 12 + Doctrine ORM/DBAL (MySQL/Postgres)
 - Redis semantic cache + embedding memoization
 - Laravel Scout vector indexing (`users`, `orders`, `products`, `documents`)
-- AI SDK abstraction for embeddings and LLM completions
-- MCP-style conversation context orchestration (`conversation_id`)
-- Boaster + Sprite role/permission adapters
-- JMS Serializer for structured API responses
-- Inertia + React + Redux frontend
-- Laravel Octane config for AI-heavy endpoint performance
-- Optional Boost config for frontend bootstrap speed
-- Larastan/PHPStan level 8 static analysis config
+- AI SDK abstraction (default **Ollama**) + vector backend (default **Meilisearch**)
+- MCP-style multi-turn context via `conversation_id`
+- Boaster + Sprite permission adapters
+- JMS Serializer response formatting
+- Laravel Octane configuration for AI-heavy endpoints
+- Optional Boost configuration for frontend acceleration
+- Larastan/PHPStan level 8 config
 
-## Security and hardening
-- Hardened CORS + security headers (CSP, XSS, frame/referrer protections)
-- API throttling (`ai-query` limiter + status endpoint limits)
-- Input sanitization (`strip_tags`, normalized conversation IDs)
-- Injection pattern detection in abuse detection layer
-- Doctrine parameterized analytics queries to mitigate SQL injection risk
+## Security
+- Hardened CORS + CSP + XSS + frame/referrer hardening
+- Request sanitization in AI query request layer
+- API throttling for all AI/data endpoints
+- Doctrine parameterized analytics queries for injection resistance
 
-## Features
-- Multi-turn chat preserving `conversation_id`
-- Vector + RAG retrieval before every completion
-- Prebuilt sample RAG queries (orders, products, summaries)
-- Aggregate queries, joins, date-range filtering
-- Cost-per-request estimation
-- Connection checks for DB, Redis, and AI endpoint
-- Animated dashboard widgets, table row highlights, and notifications
+## Frontend pages
+- Landing (animated hero/graphs + auth CTAs)
+- Dashboard (live metrics API + latest orders/chat + loaders)
+- Chat (multi-turn RAG with sample queries + notifications)
+- Users/Products/Orders (pagination/filter/search/analytics scaffolds)
+- Documents (audio/video/document filter + summarization action)
+- Settings (provider/endpoint visibility and connectivity checks)
 
-## APIs
-- `POST /api/ai-v2/query` (throttled, secure, JMS-formatted)
-- `GET /api/system/status` (connectivity verification)
+## API endpoints
+- `POST /api/ai-v2/query`
+- `GET /api/system/status`
+- `GET /api/dashboard/metrics`
+- `GET /api/settings`
+- `GET /api/analytics`
+- `GET /api/users`, `GET /api/products`, `GET /api/orders`, `GET /api/documents`
 
 ## Setup
 ```bash

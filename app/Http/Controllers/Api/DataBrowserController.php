@@ -51,4 +51,13 @@ class DataBrowserController extends Controller
 
         return response()->json($documents);
     }
+
+    public function analytics(): JsonResponse
+    {
+        return response()->json([
+            'users_by_role' => User::query()->selectRaw('role, COUNT(*) as total')->groupBy('role')->pluck('total', 'role'),
+            'orders_by_status' => Order::query()->selectRaw('status, COUNT(*) as total')->groupBy('status')->pluck('total', 'status'),
+            'product_categories' => Product::query()->selectRaw('category, COUNT(*) as total')->groupBy('category')->pluck('total', 'category'),
+        ]);
+    }
 }

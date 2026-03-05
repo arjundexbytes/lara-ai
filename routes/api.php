@@ -13,6 +13,7 @@ Route::middleware(['auth:sanctum', 'role.permission'])->group(function (): void 
 
     Route::get('/dashboard/metrics', DashboardMetricsController::class)->middleware('throttle:120,1');
     Route::get('/settings', SettingsController::class)->middleware('throttle:60,1');
+    Route::get('/analytics', [DataBrowserController::class, 'analytics'])->middleware('throttle:120,1');
 
     Route::get('/users', [DataBrowserController::class, 'users'])->middleware('throttle:120,1');
     Route::get('/products', [DataBrowserController::class, 'products'])->middleware('throttle:120,1');

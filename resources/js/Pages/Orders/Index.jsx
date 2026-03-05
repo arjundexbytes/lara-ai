@@ -8,13 +8,19 @@ export default function OrdersIndex() {
   const [status, setStatus] = useState('');
   const [page, setPage] = useState(1);
   const [payload, setPayload] = useState(null);
+  const [analytics, setAnalytics] = useState(null);
 
   useEffect(() => {
     setPayload(null);
     axios.get('/api/orders', { params: { status, page } }).then(({ data }) => setPayload(data));
   }, [status, page]);
 
+  useEffect(() => {
+    axios.get('/api/analytics').then(({ data }) => setAnalytics(data));
+  }, []);
+
   const total = useMemo(() => (payload?.data || []).reduce((sum, o) => sum + Number(o.total), 0), [payload]);
+  const chartData = Object.entries(analytics?.orders_by_status || {}).map(([label, value]) => ({ label, value }));
 
   return (
     <AppLayout title="Orders">
@@ -28,7 +34,7 @@ export default function OrdersIndex() {
           </select>
         </div>
         <div className="rounded border bg-white p-4">
-          <AnimatedBarChart data={[{ label: 'Orders on Page', value: payload?.data?.length || 0 }, { label: 'Total/100', value: Math.round(total / 100) }]} />
+          {analytics ? <AnimatedBarChart data={chartData} /> : <div className="h-20 animate-pulse rounded bg-slate-200" />}
         </div>
       </div>
       {!payload ? <div className="h-16 animate-pulse rounded bg-slate-200" /> : <OrdersTable orders={payload.data} />}

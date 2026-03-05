@@ -5,9 +5,13 @@ import ConnectionStatusButton from '@/Components/Status/ConnectionStatusButton';
 
 export default function SettingsIndex() {
   const [settings, setSettings] = useState(null);
+  const [form, setForm] = useState({ ai_provider: 'ollama', vector_driver: 'meilisearch' });
 
   useEffect(() => {
-    axios.get('/api/settings').then(({ data }) => setSettings(data));
+    axios.get('/api/settings').then(({ data }) => {
+      setSettings(data);
+      setForm({ ai_provider: data.ai_provider, vector_driver: data.vector_driver });
+    });
   }, []);
 
   return (
@@ -19,18 +23,29 @@ export default function SettingsIndex() {
         </div>
 
         <div className="rounded border bg-white p-4">
-          <h2 className="mb-2 text-lg font-semibold">AI & Vector Providers</h2>
+          <h2 className="mb-2 text-lg font-semibold">AI / Vector Provider Config</h2>
           {!settings ? (
             <div className="h-16 animate-pulse rounded bg-slate-200" />
           ) : (
-            <div className="grid gap-2 text-sm">
-              <div>AI Provider: <strong>{settings.ai_provider}</strong></div>
+            <form className="grid gap-2 text-sm md:grid-cols-2">
+              <label className="grid gap-1">AI Provider
+                <select value={form.ai_provider} onChange={(e) => setForm((f) => ({ ...f, ai_provider: e.target.value }))} className="rounded border px-3 py-2">
+                  <option value="ollama">Ollama</option>
+                  <option value="openai">OpenAI</option>
+                </select>
+              </label>
+              <label className="grid gap-1">Vector Driver
+                <select value={form.vector_driver} onChange={(e) => setForm((f) => ({ ...f, vector_driver: e.target.value }))} className="rounded border px-3 py-2">
+                  <option value="meilisearch">Meilisearch</option>
+                  <option value="database">Database</option>
+                </select>
+              </label>
               <div>Ollama Endpoint: <strong>{settings.ollama_endpoint}</strong></div>
-              <div>Vector Driver: <strong>{settings.vector_driver}</strong></div>
               <div>Meilisearch Host: <strong>{settings.meilisearch_host}</strong></div>
               <div>Redis Host: <strong>{settings.redis_host}</strong></div>
               <div>DB Connection: <strong>{settings.db_connection}</strong></div>
-            </div>
+              <button type="button" className="col-span-full rounded border px-3 py-2">Save Settings (scaffold)</button>
+            </form>
           )}
         </div>
       </div>

@@ -2,7 +2,7 @@ import React from 'react';
 import NotificationCenter from '@/Components/NotificationCenter';
 
 const links = [
-  ['Dashboard', '/'],
+  ['Dashboard', '/dashboard'],
   ['Chat', '/chat'],
   ['Users', '/users'],
   ['Products', '/products'],
