@@ -5,3 +5,5 @@
 /storage
 /storage/framework
 /vendor
+composer.lock
+package-lock.json
