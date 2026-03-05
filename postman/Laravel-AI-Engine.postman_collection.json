@@ -1,0 +1,130 @@
+{
+  "info": {
+    "name": "Laravel AI Engine Validation",
+    "_postman_id": "f5ea1240-89ff-45cd-b8cb-bf1ef1d4d521",
+    "description": "Threaded AI, security, and frontend-support API validation collection.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "AI Thread Runner",
+      "item": [
+        {
+          "name": "POST /api/ai-v2/query",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('status is expected', function () {",
+                  "  pm.expect([200,401,403,422,429]).to.include(pm.response.code);",
+                  "});",
+                  "if (pm.response.code === 200) {",
+                  "  const body = pm.response.json();",
+                  "  pm.test('conversation id preserved', function () {",
+                  "    pm.expect(body.data.conversation_id).to.eql(pm.environment.get('conversation_id'));",
+                  "  });",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{auth_token}}", "type": "text" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": \"{{query}}\",\n  \"format\": \"json\",\n  \"conversation_id\": \"{{conversation_id}}\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/ai-v2/query",
+              "host": ["{{base_url}}"],
+              "path": ["api", "ai-v2", "query"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Security",
+      "item": [
+        {
+          "name": "Rate limit burst probe",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{auth_token}}", "type": "text" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": \"burst rate test\",\n  \"format\": \"json\",\n  \"conversation_id\": \"conv_rate_limit\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/ai-v2/query",
+              "host": ["{{base_url}}"],
+              "path": ["api", "ai-v2", "query"]
+            }
+          }
+        },
+        {
+          "name": "SQL injection payload",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{auth_token}}", "type": "text" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": \"DROP TABLE users; --\",\n  \"format\": \"json\",\n  \"conversation_id\": \"conv_security_sql\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/ai-v2/query",
+              "host": ["{{base_url}}"],
+              "path": ["api", "ai-v2", "query"]
+            }
+          }
+        },
+        {
+          "name": "XSS payload",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{auth_token}}", "type": "text" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": \"<script>alert(1)</script>\",\n  \"format\": \"json\",\n  \"conversation_id\": \"conv_security_xss\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/ai-v2/query",
+              "host": ["{{base_url}}"],
+              "path": ["api", "ai-v2", "query"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Data Endpoints",
+      "item": [
+        { "name": "GET /api/dashboard/metrics", "request": { "method": "GET", "header": [{"key":"Authorization","value":"Bearer {{auth_token}}"}], "url": "{{base_url}}/api/dashboard/metrics" } },
+        { "name": "GET /api/settings", "request": { "method": "GET", "header": [{"key":"Authorization","value":"Bearer {{auth_token}}"}], "url": "{{base_url}}/api/settings" } },
+        { "name": "GET /api/analytics", "request": { "method": "GET", "header": [{"key":"Authorization","value":"Bearer {{auth_token}}"}], "url": "{{base_url}}/api/analytics" } },
+        { "name": "GET /api/system/status", "request": { "method": "GET", "header": [{"key":"Authorization","value":"Bearer {{auth_token}}"}], "url": "{{base_url}}/api/system/status" } }
+      ]
+    }
+  ],
+  "variable": [
+    { "key": "base_url", "value": "http://127.0.0.1:8000" },
+    { "key": "auth_token", "value": "" },
+    { "key": "conversation_id", "value": "conv_users_analysis" },
+    { "key": "query", "value": "show me users" }
+  ]
+}

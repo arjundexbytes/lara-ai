@@ -1,0 +1,30 @@
+{
+  "conversation_context_success_rate": 0.0,
+  "database_query_success_rate": 0.0,
+  "vector_search_usage": {
+    "scout_requests": 0,
+    "eloquent_fallback_requests": 0,
+    "fallback_efficiency_confirmed": false
+  },
+  "rag_injection_success": false,
+  "llm_hallucination_detection": {
+    "flagged": 0,
+    "checked": 0,
+    "detector_strategy": "response consistency + citation presence"
+  },
+  "formatting_accuracy": 0.0,
+  "frontend_stability": 0.0,
+  "security_verification": 0.0,
+  "overall_system_reliability": 0.0,
+  "conversation_threads_verified": [
+    "conv_users_analysis",
+    "conv_products_analysis",
+    "conv_sales_analysis",
+    "conv_user_orders",
+    "conv_business_queries",
+    "conv_ai_discussion",
+    "conv_dev_help",
+    "conv_general_chat"
+  ],
+  "missing_features_detected_and_fixed": []
+}
