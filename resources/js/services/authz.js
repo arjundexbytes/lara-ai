@@ -10,7 +10,7 @@ export function can(props, permission) {
   const set = permissionSetFromProps(props);
 
   if (!set.size) {
-    return true;
+    return false;
   }
 
   return set.has(permission);
