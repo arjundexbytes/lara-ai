@@ -6,7 +6,7 @@ import { enterpriseApi } from '@/services/api/enterpriseApi';
 import Button from '@/Components/UI/Button';
 import Badge from '@/Components/UI/Badge';
 
-export default function ConnectionStatusButton() {
+export default function ConnectionStatusButton({ compact = false }) {
   const dispatch = useDispatch();
   const { statuses, loading } = useSelector((state) => state.system);
 
@@ -22,6 +22,10 @@ export default function ConnectionStatusButton() {
       dispatch(setLoading(false));
     }
   };
+
+  if (compact) {
+    return <Button onClick={check} loading={loading} variant="success">Check</Button>;
+  }
 
   return (
     <div className="space-y-2">

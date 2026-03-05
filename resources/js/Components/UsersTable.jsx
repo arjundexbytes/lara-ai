@@ -1,4 +1,5 @@
 import React from 'react';
+import Button from '@/Components/UI/Button';
 
 export default function UsersTable({ users = [], loadingActionId = null, onDelete, onAssignPermissions }) {
   return (
@@ -18,22 +19,28 @@ export default function UsersTable({ users = [], loadingActionId = null, onDelet
               <td className="px-4 py-2"><a href={`/users/${user.id}`} className="text-indigo-700 hover:underline">{user.name}</a></td>
               <td className="px-4 py-2">{user.email}</td>
               <td className="px-4 py-2">{(user.roles || []).map((r) => r.name || r).join(', ')}</td>
-              <td className="px-4 py-2 space-x-2">
-                <button className="rounded border px-2 py-1 text-xs">Edit</button>
-                <button
-                  disabled={loadingActionId === user.id}
-                  onClick={() => onAssignPermissions?.(user)}
-                  className="rounded border px-2 py-1 text-xs disabled:opacity-60"
-                >
-                  {loadingActionId === user.id ? 'Loading...' : 'Assign Permissions'}
-                </button>
-                <button
-                  disabled={loadingActionId === user.id}
-                  onClick={() => onDelete?.(user)}
-                  className="rounded border border-red-300 px-2 py-1 text-xs text-red-700 disabled:opacity-60"
-                >
-                  Delete
-                </button>
+              <td className="space-x-2 px-4 py-2">
+                <Button variant="info" className="px-2 py-1 text-xs">Edit</Button>
+                {onAssignPermissions ? (
+                  <Button
+                    variant="primary"
+                    loading={loadingActionId === user.id}
+                    onClick={() => onAssignPermissions?.(user)}
+                    className="px-2 py-1 text-xs"
+                  >
+                    Assign Permissions
+                  </Button>
+                ) : null}
+                {onDelete ? (
+                  <Button
+                    variant="danger"
+                    loading={loadingActionId === user.id}
+                    onClick={() => onDelete?.(user)}
+                    className="px-2 py-1 text-xs"
+                  >
+                    Delete
+                  </Button>
+                ) : null}
               </td>
             </tr>
           ))}

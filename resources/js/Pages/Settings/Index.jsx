@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { usePage } from '@inertiajs/react';
 import AppLayout from '@/Layouts/AppLayout';
 import { useDispatch } from 'react-redux';
 import { pushNotification } from '@/store/slices/notificationSlice';
@@ -6,8 +7,11 @@ import { enterpriseApi } from '@/services/api/enterpriseApi';
 import Button from '@/Components/UI/Button';
 import Skeleton from '@/Components/UI/Skeleton';
 import Alert from '@/Components/UI/Alert';
+import { can } from '@/services/authz';
 
 export default function SettingsIndex() {
+  const inertiaPage = usePage();
+  const canManage = can(inertiaPage.props, 'manage settings');
   const [settings, setSettings] = useState(null);
   const [form, setForm] = useState({ ai_provider: 'ollama', vector_driver: 'meilisearch', rag_top_k: 5 });
   const [error, setError] = useState('');
@@ -66,7 +70,7 @@ export default function SettingsIndex() {
             <div>Meilisearch Host: <strong>{settings.meilisearch_host}</strong></div>
             <div>Redis Host: <strong>{settings.redis_host}</strong></div>
             <div>DB Connection: <strong>{settings.db_connection}</strong></div>
-            <Button loading={saving} type="submit" className="col-span-full">Save Settings</Button>
+            {canManage ? <Button loading={saving} type="submit" className="col-span-full">Save Settings</Button> : null}
           </form>
         ) : null}
       </div>

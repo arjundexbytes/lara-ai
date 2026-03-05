@@ -1,12 +1,16 @@
 import React, { useEffect, useState } from 'react';
+import { usePage } from '@inertiajs/react';
 import AppLayout from '@/Layouts/AppLayout';
 import { useDispatch } from 'react-redux';
 import { pushNotification } from '@/store/slices/notificationSlice';
 import { enterpriseApi } from '@/services/api/enterpriseApi';
 import Button from '@/Components/UI/Button';
 import Skeleton from '@/Components/UI/Skeleton';
+import { can } from '@/services/authz';
 
 export default function PermissionsIndex() {
+  const inertiaPage = usePage();
+  const canManage = can(inertiaPage.props, 'manage permissions');
   const [payload, setPayload] = useState(null);
   const [query, setQuery] = useState('');
   const [page, setPage] = useState(1);
@@ -47,7 +51,7 @@ export default function PermissionsIndex() {
         <div className="mb-2 font-semibold">Create Permission</div>
         <div className="flex gap-2">
           <input value={name} onChange={(e) => setName(e.target.value)} className="w-full rounded border px-3 py-2" placeholder="Permission name" />
-          <Button loading={loading} onClick={createPermission}>Create</Button>
+          {canManage ? <Button loading={loading} onClick={createPermission}>Create</Button> : null}
         </div>
       </div>
       <div className="mb-4 flex gap-2">
@@ -60,7 +64,7 @@ export default function PermissionsIndex() {
               <span>{permission.name}</span>
               <div className="space-x-2">
                 <Button variant="info">Edit</Button>
-                <Button variant="danger" onClick={() => removePermission(permission)}>Delete</Button>
+                {canManage ? <Button variant="danger" onClick={() => removePermission(permission)}>Delete</Button> : null}
               </div>
             </div>
           ))}

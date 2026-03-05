@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { usePage } from '@inertiajs/react';
 import UsersTable from '@/Components/UsersTable';
 import AnimatedBarChart from '@/Components/AnimatedBarChart';
 import AppLayout from '@/Layouts/AppLayout';
@@ -9,8 +10,11 @@ import Button from '@/Components/UI/Button';
 import Modal from '@/Components/UI/Modal';
 import Skeleton from '@/Components/UI/Skeleton';
 import Alert from '@/Components/UI/Alert';
+import { can } from '@/services/authz';
 
 export default function UsersIndex() {
+  const inertiaPage = usePage();
+  const canManage = can(inertiaPage.props, 'manage users');
   const [query, setQuery] = useState('');
   const [page, setPage] = useState(1);
   const [payload, setPayload] = useState(null);
@@ -51,6 +55,7 @@ export default function UsersIndex() {
       dispatch(pushNotification({ type: 'error', message: 'Delete failed.' }));
     } finally {
       setLoadingActionId(null);
+      setDeletingUser(null);
     }
   };
 
@@ -66,6 +71,7 @@ export default function UsersIndex() {
       dispatch(pushNotification({ type: 'error', message: 'Permission assignment failed.' }));
     } finally {
       setLoadingActionId(null);
+      setDeletingUser(null);
     }
   };
 
@@ -94,8 +100,8 @@ export default function UsersIndex() {
         <UsersTable
           users={payload?.data || []}
           loadingActionId={loadingActionId}
-          onDelete={onDelete}
-          onAssignPermissions={(u) => setActiveUser(u)}
+          onDelete={canManage ? onDelete : null}
+          onAssignPermissions={canManage ? (u) => setActiveUser(u) : null}
         />
       )}
       <div className="mt-3 flex gap-2">

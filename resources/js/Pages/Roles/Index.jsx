@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { usePage } from '@inertiajs/react';
 import AppLayout from '@/Layouts/AppLayout';
 import { useDispatch } from 'react-redux';
 import { pushNotification } from '@/store/slices/notificationSlice';
@@ -6,8 +7,11 @@ import { enterpriseApi } from '@/services/api/enterpriseApi';
 import Button from '@/Components/UI/Button';
 import Modal from '@/Components/UI/Modal';
 import Skeleton from '@/Components/UI/Skeleton';
+import { can } from '@/services/authz';
 
 export default function RolesIndex() {
+  const inertiaPage = usePage();
+  const canManage = can(inertiaPage.props, 'manage roles');
   const [payload, setPayload] = useState(null);
   const [query, setQuery] = useState('');
   const [page, setPage] = useState(1);
@@ -60,7 +64,7 @@ export default function RolesIndex() {
         <div className="mb-2 font-semibold">Create Role</div>
         <div className="flex gap-2">
           <input value={name} onChange={(e) => setName(e.target.value)} className="w-full rounded border px-3 py-2" placeholder="Role name" />
-          <Button loading={loading} onClick={createRole}>Create</Button>
+          {canManage ? <Button loading={loading} onClick={createRole}>Create</Button> : null}
         </div>
       </div>
       <div className="mb-4 flex gap-2">
@@ -73,7 +77,7 @@ export default function RolesIndex() {
               <span>{role.name}</span>
               <div className="space-x-2">
                 <Button variant="info" onClick={() => setModalRole(role)}>Manage Permissions</Button>
-                <Button variant="danger" onClick={() => removeRole(role)}>Delete</Button>
+                {canManage ? <Button variant="danger" onClick={() => removeRole(role)}>Delete</Button> : null}
               </div>
             </div>
           ))}
@@ -92,7 +96,7 @@ export default function RolesIndex() {
         footer={(
           <>
             <Button variant="warning" onClick={() => setModalRole(null)}>Cancel</Button>
-            <Button loading={loading} onClick={syncRolePermissions}>Save</Button>
+            {canManage ? <Button loading={loading} onClick={syncRolePermissions}>Save</Button> : null}
           </>
         )}
       >

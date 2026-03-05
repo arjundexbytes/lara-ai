@@ -1,9 +1,10 @@
-import React, { useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { addMessage } from '@/store/slices/chatSlice';
 import { pushNotification } from '@/store/slices/notificationSlice';
 import { enterpriseApi } from '@/services/api/enterpriseApi';
 import Button from '@/Components/UI/Button';
+import Skeleton from '@/Components/UI/Skeleton';
 
 const quickQueries = [
   'Show completed orders by user for last 30 days',
@@ -11,8 +12,40 @@ const quickQueries = [
   'Find policy documents for refunds and summarize',
 ];
 
+function sanitizeHtml(html) {
+  return String(html || '').replace(/<script[\s\S]*?>[\s\S]*?<\/script>/gi, '');
+}
+
 function renderMessageBody(message) {
   const content = message.message;
+  const type = message.content_type;
+
+  if (type === 'table' && Array.isArray(content?.rows)) {
+    return (
+      <div className="overflow-x-auto">
+        <table className="min-w-full border text-xs">
+          <thead><tr>{(content.headers || []).map((h) => <th key={h} className="border px-2 py-1 text-left">{h}</th>)}</tr></thead>
+          <tbody>{content.rows.map((row, i) => <tr key={i}>{row.map((cell, ci) => <td key={ci} className="border px-2 py-1">{String(cell)}</td>)}</tr>)}</tbody>
+        </table>
+      </div>
+    );
+  }
+
+  if (type === 'html') {
+    return <div className="prose prose-sm max-w-none" dangerouslySetInnerHTML={{ __html: sanitizeHtml(content) }} />;
+  }
+
+  if (type === 'audio') {
+    return <audio controls className="w-full" src={String(content || '')} />;
+  }
+
+  if (type === 'video') {
+    return <video controls className="max-h-64 w-full rounded" src={String(content || '')} />;
+  }
+
+  if (type === 'document') {
+    return <a className="text-blue-700 underline" href={String(content || '#')} target="_blank" rel="noreferrer">Open document preview</a>;
+  }
 
   if (typeof content === 'object') {
     return <pre className="overflow-x-auto rounded bg-slate-900 p-2 text-xs text-slate-100">{JSON.stringify(content, null, 2)}</pre>;
@@ -30,11 +63,33 @@ function renderMessageBody(message) {
 export default function ChatInterface() {
   const [query, setQuery] = useState('');
   const [loading, setLoading] = useState(false);
+  const [visibleCount, setVisibleCount] = useState(20);
+  const [loadingOlder, setLoadingOlder] = useState(false);
   const dispatch = useDispatch();
   const { conversationId, messages } = useSelector((state) => state.chat);
   const boxRef = useRef(null);
 
   const sortedMessages = useMemo(() => [...messages].reverse(), [messages]);
+  const visibleMessages = sortedMessages.slice(0, visibleCount);
+
+  useEffect(() => {
+    const box = boxRef.current;
+    if (!box) return;
+
+    const onScroll = () => {
+      if (box.scrollTop + box.clientHeight >= box.scrollHeight - 12 && visibleCount < sortedMessages.length) {
+        setLoadingOlder(true);
+        setTimeout(() => {
+          setVisibleCount((n) => n + 20);
+          setLoadingOlder(false);
+        }, 350);
+      }
+    };
+
+    box.addEventListener('scroll', onScroll);
+
+    return () => box.removeEventListener('scroll', onScroll);
+  }, [visibleCount, sortedMessages.length]);
 
   const submit = async (event) => {
     event.preventDefault();
@@ -44,7 +99,7 @@ export default function ChatInterface() {
       return;
     }
 
-    dispatch(addMessage({ role: 'user', message: query, created_at: new Date().toISOString() }));
+    dispatch(addMessage({ role: 'user', message: query, content_type: 'text', created_at: new Date().toISOString() }));
     setLoading(true);
 
     try {
@@ -54,9 +109,10 @@ export default function ChatInterface() {
         conversation_id: conversationId,
       });
 
-      dispatch(addMessage({ role: 'assistant', message: data?.data?.completion || data?.completion || 'No response.', created_at: new Date().toISOString() }));
+      dispatch(addMessage({ role: 'assistant', message: data?.data?.completion || data?.completion || 'No response.', content_type: 'text', created_at: new Date().toISOString() }));
       dispatch(pushNotification({ type: 'success', message: 'AI response received successfully.' }));
       setQuery('');
+      setVisibleCount((n) => Math.max(n, 20));
       boxRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
     } catch (error) {
       const fallback = error?.response?.data?.message || 'Failed to fetch AI response.';
@@ -81,12 +137,13 @@ export default function ChatInterface() {
 
       <div ref={boxRef} className="flex flex-col gap-3 overflow-y-auto rounded border p-3">
         {loading ? <div className="w-28 animate-pulse rounded bg-blue-50 p-2 text-xs text-blue-700">Assistant is typing…</div> : null}
-        {sortedMessages.map((message, idx) => (
+        {visibleMessages.map((message, idx) => (
           <article key={`${message.created_at || 'm'}-${idx}`} className={`max-w-[95%] rounded-lg border p-3 ${message.role === 'assistant' ? 'self-start bg-blue-50 text-blue-900' : 'self-end bg-slate-100 text-slate-900'}`}>
             <div className="mb-1 text-[11px] font-semibold uppercase tracking-wide opacity-70">{message.role}</div>
             {renderMessageBody(message)}
           </article>
         ))}
+        {loadingOlder ? <Skeleton className="h-16" /> : null}
       </div>
 
       <form onSubmit={submit} className="sticky bottom-0 flex gap-2 bg-white pt-1">
