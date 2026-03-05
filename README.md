@@ -1,42 +1,37 @@
 # Laravel 12 Enterprise AI Platform Skeleton
 
-Production-ready Laravel 12 architecture skeleton for AI-assisted analytics and operations.
+Production-ready Laravel 12 skeleton for AI-assisted analytics and operations with secure API patterns and scalable workers.
 
-## Core platform
-- Laravel 12 + Inertia React + Redux + Breeze-compatible auth pages
-- Doctrine ORM/DBAL for aggregate and join analytics
-- Redis semantic cache for embeddings and RAG memoization
-- Laravel Scout vector indexing for `Users`, `Orders`, `Products`, `Documents`
-- AI SDK integration service for embeddings + completions
-- MCP-style context orchestration (`conversation_id` memory + session state)
-- Role access via Boaster/Sprite adapter services
-- JMS Serializer-based API response formatting
+## Core stack
+- Laravel 12 + Doctrine ORM/DBAL (MySQL/Postgres)
+- Redis semantic caching + embedding memoization
+- Laravel Scout vector indexing (`users`, `orders`, `products`, `documents`)
+- AI SDK abstraction for embeddings + LLM completions
+- MCP-style multi-context orchestration by `conversation_id`
+- Boaster + Sprite permission adapters
+- JMS Serializer response formatting
+- Inertia + React + Redux frontend with Breeze React auth placeholders
+- Laravel Octane configuration for high-performance AI endpoints
+- Larastan (PHPStan level 8) static analysis config
+- Optional Boost config toggles for frontend bootstrap acceleration
 
 ## 11-layer architecture
-See `app/Support/ARCHITECTURE.md`.
+See `app/Support/ARCHITECTURE.md` for layer mapping.
 
-## Endpoints
-- `POST /api/ai-v2/query`
-- `GET /api/system/status`
+## APIs
+- `POST /api/ai-v2/query` (throttled with `throttle:ai-query`)
+- `GET /api/system/status` (DB/Redis/AI checks)
 
-### Example payload
-```json
-{
-  "query": "total completed orders in the last month",
-  "format": "json",
-  "conversation_id": "conv_123",
-  "date_from": "2026-01-01",
-  "date_to": "2026-01-31"
-}
+## Security and reliability
+- Hardened CORS middleware with secure defaults and OPTIONS handling
+- Rate limiting for AI and system endpoints
+- Injection signature detection via abuse detection service
+- Doctrine parameterized SQL in analytics repository
+
+## Static analysis
+```bash
+composer analyse
 ```
-
-## Features included
-- Multi-turn chat preserving `conversation_id`
-- Vector + RAG retrieval before every completion
-- Prebuilt RAG examples (user orders, product summaries, policy lookup)
-- Doctrine-backed joins and aggregate queries
-- Cost estimation per AI request
-- Frontend connection verification button for DB/Redis/AI
 
 ## Setup
 ```bash
@@ -46,6 +41,7 @@ php artisan key:generate
 php artisan migrate
 php artisan db:seed
 php artisan breeze:install react
+php artisan octane:install
 npm install
 npm run dev
 ```
