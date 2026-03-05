@@ -1,6 +1,6 @@
 # Laravel 12 Enterprise AI Platform
 
-Enterprise-grade Laravel 12 AI system skeleton with secure backend orchestration, MCP memory context, RAG retrieval, and animated Inertia/React frontend.
+Enterprise-grade Laravel 12 AI system with secure backend orchestration, MCP memory context, RAG retrieval, and animated Inertia/React frontend.
 
 ## Core stack
 - Laravel 12 + Doctrine ORM/DBAL (MySQL/Postgres)
@@ -8,7 +8,7 @@ Enterprise-grade Laravel 12 AI system skeleton with secure backend orchestration
 - Laravel Scout vector indexing (`users`, `orders`, `products`, `documents`)
 - AI SDK abstraction (default **Ollama**) + vector backend (default **Meilisearch**)
 - MCP-style multi-turn context via `conversation_id`
-- Boaster + Sprite permission adapters
+- **Spatie Laravel Permission** for roles/permissions (no `users.role` column)
 - JMS Serializer response formatting
 - Laravel Octane configuration for AI-heavy endpoints
 - Optional Boost configuration for frontend acceleration
@@ -19,14 +19,17 @@ Enterprise-grade Laravel 12 AI system skeleton with secure backend orchestration
 - Request sanitization in AI query request layer
 - API throttling for all AI/data endpoints
 - Doctrine parameterized analytics queries for injection resistance
+- Spatie permission middleware + backend checks on role/permission routes
 
 ## Frontend pages
 - Landing (animated hero/graphs + auth CTAs)
 - Dashboard (live metrics API + latest orders/chat + loaders)
 - Chat (multi-turn RAG with sample queries + notifications)
-- Users/Products/Orders (pagination/filter/search/analytics scaffolds)
-- Documents (audio/video/document filter + summarization action)
+- Users (profile navigation, delete, assign permissions popup, pagination/search)
+- Products/Orders/Documents (pagination/filter/search/analytics scaffolds)
 - Settings (provider/endpoint visibility and connectivity checks)
+- Roles (CRUD + Manage Permissions modal)
+- Permissions (CRUD)
 
 ## API endpoints
 - `POST /api/ai-v2/query`
@@ -34,7 +37,10 @@ Enterprise-grade Laravel 12 AI system skeleton with secure backend orchestration
 - `GET /api/dashboard/metrics`
 - `GET /api/settings`
 - `GET /api/analytics`
-- `GET /api/users`, `GET /api/products`, `GET /api/orders`, `GET /api/documents`
+- `GET /api/users`, `GET /api/users/{user}/profile`, `POST /api/users/{user}/permissions`, `DELETE /api/users/{user}`
+- `GET /api/roles`, `POST /api/roles`, `PUT /api/roles/{role}`, `DELETE /api/roles/{role}`, `POST /api/roles/{role}/permissions`
+- `GET /api/permissions`, `POST /api/permissions`, `PUT /api/permissions/{permission}`, `DELETE /api/permissions/{permission}`
+- `GET /api/products`, `GET /api/orders`, `GET /api/documents`, `GET /api/chats`
 
 ## Setup
 ```bash

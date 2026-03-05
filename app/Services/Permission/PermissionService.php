@@ -15,7 +15,7 @@ class PermissionService
 
     public function canAccessAiApi(User $user): bool
     {
-        return $this->boaster->grants($user, 'ai.query')
-            && $this->sprite->grants($user, 'ai.query');
+        return $this->boaster->grants($user, 'query ai')
+            && $this->sprite->grants($user, 'query ai');
     }
 }

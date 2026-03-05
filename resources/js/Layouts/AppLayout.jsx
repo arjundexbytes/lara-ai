@@ -9,6 +9,8 @@ const links = [
   ['Orders', '/orders'],
   ['Documents', '/documents'],
   ['Settings', '/settings'],
+  ['Roles', '/roles'],
+  ['Permissions', '/permissions'],
 ];
 
 export default function AppLayout({ title, children }) {

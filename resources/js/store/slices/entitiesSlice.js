@@ -4,8 +4,8 @@ const entitiesSlice = createSlice({
   name: 'entities',
   initialState: {
     users: [
-      { id: 1, name: 'Admin User', email: 'admin@example.com', role: 'admin' },
-      { id: 2, name: 'Ops Manager', email: 'manager@example.com', role: 'manager' },
+      { id: 1, name: 'Admin User', email: 'admin@example.com', roles: ['admin'] },
+      { id: 2, name: 'Ops Manager', email: 'manager@example.com', roles: ['manager'] },
     ],
     products: [
       { id: 1, name: 'Enterprise Widget', category: 'Hardware', price: 199.99 },

@@ -16,6 +16,7 @@ class DataBrowserController extends Controller
     {
         $q = (string) $request->query('q', '');
         $users = User::query()
+            ->with('roles')
             ->when($q !== '', fn ($query) => $query->where('name', 'like', "%$q%"))
             ->paginate((int) $request->query('per_page', 10));
 
@@ -52,10 +53,25 @@ class DataBrowserController extends Controller
         return response()->json($documents);
     }
 
+    public function chats(Request $request): JsonResponse
+    {
+        $q = (string) $request->query('q', '');
+        $chats = \App\Models\Chat::query()
+            ->when($q !== '', fn ($query) => $query->where('message', 'like', "%$q%"))
+            ->orderByDesc('created_at')
+            ->paginate((int) $request->query('per_page', 10));
+
+        return response()->json($chats);
+    }
+
     public function analytics(): JsonResponse
     {
         return response()->json([
-            'users_by_role' => User::query()->selectRaw('role, COUNT(*) as total')->groupBy('role')->pluck('total', 'role'),
+            'users_by_role' => [
+                'admin' => User::query()->role('admin')->count(),
+                'manager' => User::query()->role('manager')->count(),
+                'analyst' => User::query()->role('analyst')->count(),
+            ],
             'orders_by_status' => Order::query()->selectRaw('status, COUNT(*) as total')->groupBy('status')->pluck('total', 'status'),
             'product_categories' => Product::query()->selectRaw('category, COUNT(*) as total')->groupBy('category')->pluck('total', 'category'),
         ]);

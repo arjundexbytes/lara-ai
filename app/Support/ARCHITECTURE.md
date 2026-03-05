@@ -9,9 +9,9 @@
 7. **Memory/Session Layer**: `MemoryService` + `SessionService` + MCP context updates.
 8. **Query Parser Layer**: `AIQueryParser`.
 9. **Query Executor Layer**: `AIQueryExecutor` (Scout + AI SDK + MCP + Doctrine analytics).
-10. **Permission/Access Layer**: Boaster + Sprite adapters via `PermissionService`.
+10. **Permission/Access Layer**: Spatie Permission + Boaster/Sprite adapters via `PermissionService`.
 11. **Serialization/API Response Layer**: `ApiResponseFormatter` with JMS serializer.
 
 ## Frontend application
-- Inertia + React + Redux pages include Landing, Dashboard, Chat, Users, Products, Orders, Settings, Documents.
-- Animated charts, skeleton loaders, notifications, and responsive transitions.
+- Inertia + React + Redux pages include Landing, Dashboard, Chat, Users, User Profile, Products, Orders, Settings, Documents, Roles, Permissions.
+- Animated charts, skeleton loaders, notifications, confirmation flows, and responsive transitions.
