@@ -17,6 +17,8 @@ const links = [
   ['Permissions', '/permissions'],
   ['Vector DB', '/vector-dbs'],
   ['Campaigns', '/campaigns'],
+  ['Uploads', '/uploads'],
+  ['Horizon', '/horizon'],
 ];
 
 export default function AppLayout({ title, children }) {

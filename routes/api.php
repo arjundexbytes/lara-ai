@@ -9,6 +9,8 @@ use App\Http\Controllers\Api\RoleController;
 use App\Http\Controllers\Api\SettingsController;
 use App\Http\Controllers\Api\SystemStatusController;
 use App\Http\Controllers\Api\UserManagementController;
+use App\Http\Controllers\Api\UploadController;
+use App\Http\Controllers\Api\HorizonMetricsController;
 use App\Http\Controllers\Api\VectorDatabaseController;
 use Illuminate\Support\Facades\Route;
 
@@ -21,6 +23,7 @@ Route::middleware(['auth:sanctum', 'role.permission'])->group(function (): void 
     Route::put('/settings', [SettingsController::class, 'update'])->middleware(['permission:manage settings', 'throttle:admin-write']);
     Route::get('/vector-databases', [VectorDatabaseController::class, 'index'])->middleware(['permission:manage settings|view analytics', 'throttle:admin-read']);
     Route::get('/analytics', [DataBrowserController::class, 'analytics'])->middleware('throttle:admin-read');
+    Route::get('/horizon/metrics', HorizonMetricsController::class)->middleware(['permission:manage settings|view analytics', 'throttle:admin-read']);
 
     Route::get('/users', [DataBrowserController::class, 'users'])->middleware('throttle:admin-read');
     Route::delete('/users/{user}', [UserManagementController::class, 'destroy'])->middleware(['permission:manage users', 'throttle:admin-write']);
@@ -44,6 +47,10 @@ Route::middleware(['auth:sanctum', 'role.permission'])->group(function (): void 
     Route::delete('/permissions/{permission}', [PermissionController::class, 'destroy'])->middleware(['permission:manage permissions', 'throttle:admin-write']);
 
     Route::get('/campaigns', [CampaignController::class, 'index'])->middleware(['permission:manage campaigns|view analytics', 'throttle:admin-read']);
+
+    Route::get('/uploads', [UploadController::class, 'index'])->middleware('throttle:admin-read');
+    Route::post('/uploads', [UploadController::class, 'store'])->middleware(['permission:query ai|manage uploads', 'throttle:admin-write']);
+    Route::delete('/uploads/{upload}', [UploadController::class, 'destroy'])->middleware(['permission:query ai|manage uploads', 'throttle:admin-write']);
     Route::post('/campaigns', [CampaignController::class, 'store'])->middleware(['permission:manage campaigns', 'throttle:admin-write']);
     Route::put('/campaigns/{campaign}', [CampaignController::class, 'update'])->middleware(['permission:manage campaigns', 'throttle:admin-write']);
     Route::delete('/campaigns/{campaign}', [CampaignController::class, 'destroy'])->middleware(['permission:manage campaigns', 'throttle:admin-write']);

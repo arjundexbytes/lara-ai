@@ -17,5 +17,7 @@ Route::middleware(['auth'])->group(function (): void {
     Route::get('/permissions', fn () => Inertia::render('Permissions/Index'))->middleware('can:manage permissions');
     Route::get('/vector-dbs', fn () => Inertia::render('VectorDatabases/Index'))->middleware('can:manage settings');
     Route::get('/campaigns', fn () => Inertia::render('Campaigns/Index'))->middleware('can:manage campaigns');
+    Route::get('/uploads', fn () => Inertia::render('Uploads/Index'))->middleware('can:query ai');
+    Route::get('/horizon', fn () => Inertia::render('Horizon/Index'))->middleware('can:manage settings');
     Route::get('/chat', fn () => Inertia::render('Chat/Index'))->middleware('can:query ai');
 });

@@ -16,6 +16,10 @@ async function request<T>(fn: () => Promise<{ data: T }>): Promise<T> {
 
 export const apiService = {
   dashboard: () => request(() => client.get(API_ENDPOINTS.dashboardMetrics)),
+  horizonMetrics: () => request(() => client.get('/api/horizon/metrics')),
+  uploads: (params: Record<string, unknown>) => request(() => client.get('/api/uploads', { params })),
+  uploadFile: (formData: FormData) => request(() => client.post('/api/uploads', formData, { headers: { 'Content-Type': 'multipart/form-data' } })),
+  deleteUpload: (id: number | string) => request(() => client.delete(`/api/uploads/${id}`)),
   status: () => request(() => client.get(API_ENDPOINTS.systemStatus)),
   users: (params: Record<string, unknown>) => request(() => client.get(API_ENDPOINTS.users, { params })),
   userProfile: (id: number | string, params: Record<string, unknown> = {}) => request(() => client.get(`${API_ENDPOINTS.users}/${id}/profile`, { params })),

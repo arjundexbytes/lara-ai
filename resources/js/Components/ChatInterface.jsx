@@ -5,6 +5,7 @@ import { pushNotification } from '@/store/slices/notificationSlice';
 import { enterpriseApi } from '@/services/api/enterpriseApi';
 import Button from '@/Components/UI/Button';
 import Skeleton from '@/Components/UI/Skeleton';
+import Modal from '@/Components/UI/Modal';
 
 const quickQueries = [
   'Show completed orders by user for last 30 days',
@@ -65,6 +66,10 @@ export default function ChatInterface() {
   const [loading, setLoading] = useState(false);
   const [visibleCount, setVisibleCount] = useState(20);
   const [loadingOlder, setLoadingOlder] = useState(false);
+  const [uploadsOpen, setUploadsOpen] = useState(false);
+  const [uploads, setUploads] = useState(null);
+  const [uploadsLoading, setUploadsLoading] = useState(false);
+  const [uploadsQuery, setUploadsQuery] = useState('');
   const dispatch = useDispatch();
   const { conversationId, messages } = useSelector((state) => state.chat);
   const boxRef = useRef(null);
@@ -90,6 +95,19 @@ export default function ChatInterface() {
 
     return () => box.removeEventListener('scroll', onScroll);
   }, [visibleCount, sortedMessages.length]);
+
+
+  const loadUploads = async () => {
+    setUploadsLoading(true);
+    try {
+      const data = await enterpriseApi.getUploads({ conversation_id: conversationId, q: uploadsQuery, per_page: 12 });
+      setUploads(data);
+    } catch {
+      dispatch(pushNotification({ type: 'error', message: 'Failed to load uploaded files.' }));
+    } finally {
+      setUploadsLoading(false);
+    }
+  };
 
   const submit = async (event) => {
     event.preventDefault();
@@ -127,6 +145,7 @@ export default function ChatInterface() {
       <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-slate-500">
         <span>Conversation: {conversationId}</span>
         <div className="flex flex-wrap gap-2">
+          <button onClick={() => { setUploadsOpen(true); loadUploads(); }} className="rounded border px-3 py-1 text-xs" aria-label="Uploaded files">📁 Uploaded Files</button>
           {quickQueries.map((item) => (
             <button key={item} onClick={() => setQuery(item)} className="rounded-full border px-3 py-1 transition hover:bg-slate-100">
               {item}
@@ -145,6 +164,35 @@ export default function ChatInterface() {
         ))}
         {loadingOlder ? <Skeleton className="h-16" /> : null}
       </div>
+
+
+      <Modal
+        open={uploadsOpen}
+        onClose={() => setUploadsOpen(false)}
+        title="Uploaded Files"
+        footer={(
+          <button onClick={() => setUploadsOpen(false)} className="rounded border px-3 py-2">Close</button>
+        )}
+      >
+        <div className="mb-2">
+          <input value={uploadsQuery} onChange={(e) => setUploadsQuery(e.target.value)} className="w-full rounded border px-3 py-2" placeholder="Search uploaded files" />
+          <button onClick={loadUploads} className="mt-2 rounded border px-3 py-1 text-sm">Search</button>
+        </div>
+        {uploadsLoading ? <Skeleton className="h-16" /> : (
+          <div className="grid gap-2 md:grid-cols-2">
+            {(uploads?.data || []).map((item) => (
+              <div key={item.id} className="rounded border p-2 text-sm">
+                <div className="truncate font-semibold">{item.name}</div>
+                <div className="text-xs text-slate-500">{item.mime_type}</div>
+                {item.mime_type?.startsWith('image/') ? <img src={item.url} alt={item.name} className="mt-2 h-20 w-full rounded object-cover" /> : null}
+                {item.mime_type?.startsWith('audio/') ? <audio controls className="mt-2 w-full" src={item.url} /> : null}
+                {item.mime_type?.startsWith('video/') ? <video controls className="mt-2 w-full" src={item.url} /> : null}
+                {!item.mime_type?.startsWith('image/') && !item.mime_type?.startsWith('audio/') && !item.mime_type?.startsWith('video/') ? <a className="mt-2 inline-block text-blue-700 underline" href={item.url} target="_blank" rel="noreferrer">Download</a> : null}
+              </div>
+            ))}
+          </div>
+        )}
+      </Modal>
 
       <form onSubmit={submit} className="sticky bottom-0 flex gap-2 bg-white pt-1">
         <input
