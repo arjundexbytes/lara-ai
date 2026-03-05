@@ -1,6 +1,6 @@
 import React from 'react';
-import Card from '@/src/components/cards/Card';
+import LandingPageHero from '@/src/components/landing/LandingPageHero';
 
 export default function Landing() {
-  return <Card>Enterprise Laravel AI Frontend</Card>;
+  return <LandingPageHero onCta={() => { window.location.href = '/dashboard'; }} />;
 }

@@ -1,14 +1,28 @@
 import React from 'react';
-import Grid from '@mui/material/Grid';
+import Stack from '@mui/material/Stack';
 import { useFetch } from '@/src/hooks/useFetch';
 import { apiService } from '@/src/api/apiService';
-import MetricChart from '@/src/components/charts/MetricChart';
+import DashboardCards from '@/src/components/cards/DashboardCards';
 import AnimatedChart from '@/src/components/charts/AnimatedChart';
-import SkeletonLoader from '@/src/components/loaders/SkeletonLoader';
+import AnalyticsTable from '@/src/components/analytics/AnalyticsTable';
+import LoaderWrapper from '@/src/components/wrappers/LoaderWrapper';
+import Topbar from '@/src/components/layout/Topbar';
+import ConnectionStatus from '@/src/components/status/ConnectionStatus';
 
 export default function Dashboard() {
-  const { data, loading } = useFetch(() => apiService.dashboard(), []);
-  if (loading) return <SkeletonLoader rows={6} />;
-  const m = (data as any)?.metrics || {};
-  return <Grid container spacing={2}><Grid item xs={12} md={2}><MetricChart title="AI latency" value={m.avg_ai_latency_ms || 0} /></Grid><Grid item xs={12} md={2}><MetricChart title="Requests" value={m.ai_requests_today || 0} /></Grid><Grid item xs={12} md={2}><MetricChart title="Error rate" value={m.error_rate || 0} /></Grid><Grid item xs={12} md={2}><MetricChart title="System" value={m.system_health || 'unknown'} /></Grid><Grid item xs={12}><AnimatedChart data={[{ label: 'req', value: Number(m.ai_requests_today || 0) }]} /></Grid></Grid>;
+  const { data, loading, error } = useFetch(() => apiService.dashboard(), []);
+  const payload = (data as any) || {};
+  const metrics = payload.metrics || {};
+
+  return (
+    <Stack spacing={2}>
+      <Topbar latency={Number(metrics.avg_ai_latency_ms || 0)} status={metrics.system_health || 'unknown'} />
+      <LoaderWrapper loading={loading} error={error}>
+        <ConnectionStatus db={true} redis={true} ai={metrics.system_health === 'healthy'} />
+        <DashboardCards metrics={{ ai_latency_ms: metrics.avg_ai_latency_ms || 0, ai_requests_today: metrics.ai_requests_today || 0, error_rate: metrics.error_rate || 0, system_health: metrics.system_health || 'unknown' }} />
+        <AnimatedChart data={[{ label: 'Requests', value: Number(metrics.ai_requests_today || 0) }, { label: 'Errors%', value: Math.round(Number(metrics.error_rate || 0) * 100) }]} />
+        <AnalyticsTable rows={[{ id: 1, metric: 'latest_orders', value: (payload.latest_orders || []).length }, { id: 2, metric: 'latest_chat', value: (payload.latest_chat || []).length }]} />
+      </LoaderWrapper>
+    </Stack>
+  );
 }
