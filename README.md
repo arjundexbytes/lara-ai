@@ -53,3 +53,7 @@ npm run dev
 ```bash
 composer analyse
 ```
+
+## Automation test assets
+- Playwright hybrid test: `tests/e2e/ai-engine.spec.ts`
+- Postman collection/environment: `postman/`
