@@ -11,8 +11,8 @@ return new class extends Migration {
             $table->id();
             $table->string('title')->index();
             $table->longText('content');
+            $table->enum('file_type', ['audio', 'video', 'document'])->default('document')->index();
             $table->json('embedding')->nullable();
-            $table->index(['title']);
         });
     }
 

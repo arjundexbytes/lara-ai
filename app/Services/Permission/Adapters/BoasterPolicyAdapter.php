@@ -8,11 +8,10 @@ class BoasterPolicyAdapter
 {
     public function grants(User $user, string $ability): bool
     {
-        if ($user->role === 'admin') {
+        if ($user->hasRole('admin')) {
             return true;
         }
 
-        return in_array($ability, ['ai.query', 'orders.view', 'products.view'], true)
-            && in_array($user->role, ['manager', 'analyst'], true);
+        return $user->can($ability);
     }
 }

@@ -25,4 +25,12 @@ class AIQueryRequest extends FormRequest
             'sort.direction' => ['nullable', 'in:asc,desc'],
         ];
     }
+
+    protected function prepareForValidation(): void
+    {
+        $this->merge([
+            'query' => trim(strip_tags((string) $this->input('query', ''))),
+            'conversation_id' => preg_replace('/[^a-zA-Z0-9_\-]/', '', (string) $this->input('conversation_id', '')),
+        ]);
+    }
 }

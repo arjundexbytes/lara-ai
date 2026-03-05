@@ -28,11 +28,16 @@ class HardenedCorsMiddleware
         return [
             'Access-Control-Allow-Origin' => config('app.url', '*'),
             'Access-Control-Allow-Methods' => 'GET, POST, PUT, PATCH, DELETE, OPTIONS',
-            'Access-Control-Allow-Headers' => 'Content-Type, Authorization, X-Requested-With',
+            'Access-Control-Allow-Headers' => 'Content-Type, Authorization, X-Requested-With, X-CSRF-TOKEN, X-XSRF-TOKEN',
+            'Access-Control-Allow-Credentials' => 'true',
+            'Vary' => 'Origin',
             'Access-Control-Max-Age' => '3600',
+            'Content-Security-Policy' => "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'",
             'X-Content-Type-Options' => 'nosniff',
             'X-Frame-Options' => 'DENY',
+            'X-XSS-Protection' => '1; mode=block',
             'Referrer-Policy' => 'strict-origin-when-cross-origin',
+            'Permissions-Policy' => 'camera=(), microphone=(), geolocation=()',
         ];
     }
 }

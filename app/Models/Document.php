@@ -13,7 +13,7 @@ class Document extends Model
 
     public $timestamps = false;
 
-    protected $fillable = ['title', 'content', 'embedding'];
+    protected $fillable = ['title', 'content', 'embedding', 'file_type'];
 
     protected $casts = [
         'embedding' => 'array',
@@ -21,6 +21,6 @@ class Document extends Model
 
     public function toSearchableArray(): array
     {
-        return $this->only(['id', 'title', 'content']);
+        return $this->only(['id', 'title', 'content', 'file_type']);
     }
 }

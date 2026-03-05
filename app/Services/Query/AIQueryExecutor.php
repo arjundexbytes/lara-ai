@@ -14,6 +14,7 @@ use App\Services\AI\McpContextOrchestrator;
 use App\Services\Cache\RedisSemanticCacheService;
 use App\Services\Memory\MemoryService;
 use Illuminate\Contracts\Auth\Authenticatable;
+use Throwable;
 
 class AIQueryExecutor
 {
@@ -42,11 +43,14 @@ class AIQueryExecutor
                 'context' => $context,
                 'examples' => $parsedIntent['examples'],
                 'rag' => $rag,
+                'instructions' => 'Always answer with RAG citations and secure aggregate insights.',
             ]);
 
             $completion = $this->aiClient->complete($prompt ?: $query);
-            $this->memory->append(new ChatMessageDTO($conversationId, (int) $user->getAuthIdentifier(), 'user', $query));
-            $this->memory->append(new ChatMessageDTO($conversationId, (int) $user->getAuthIdentifier(), 'assistant', $completion));
+            $userId = (int) $user->getAuthIdentifier();
+
+            $this->memory->append(new ChatMessageDTO($conversationId, $userId, 'user', $query));
+            $this->memory->append(new ChatMessageDTO($conversationId, $userId, 'assistant', $completion));
 
             return [
                 'conversation_id' => $conversationId,
@@ -54,6 +58,7 @@ class AIQueryExecutor
                 'embedding' => $embedding,
                 'rag' => $rag,
                 'completion' => $completion,
+                'sample_queries' => $parsedIntent['examples'],
                 'analytics' => [
                     'totals_by_status' => $this->analytics->totalsByStatus(),
                     'totals_by_date_range' => $this->analytics->totalsByDateRange($filter),
@@ -65,11 +70,22 @@ class AIQueryExecutor
 
     private function vectorRagLookup(string $query): array
     {
-        return [
-            'users' => User::search($query)->take(5)->get()->toArray(),
-            'orders' => Order::search($query)->take(5)->get()->toArray(),
-            'products' => Product::search($query)->take(5)->get()->toArray(),
-            'documents' => Document::search($query)->take(5)->get()->toArray(),
-        ];
+        $limit = (int) config('ai.rag.top_k', 5);
+
+        try {
+            return [
+                'users' => User::search($query)->take($limit)->get()->toArray(),
+                'orders' => Order::search($query)->take($limit)->get()->toArray(),
+                'products' => Product::search($query)->take($limit)->get()->toArray(),
+                'documents' => Document::search($query)->take($limit)->get()->toArray(),
+            ];
+        } catch (Throwable) {
+            return [
+                'users' => User::query()->where('name', 'like', "%$query%")->limit($limit)->get()->toArray(),
+                'orders' => Order::query()->where('status', 'like', "%$query%")->limit($limit)->get()->toArray(),
+                'products' => Product::query()->where('name', 'like', "%$query%")->limit($limit)->get()->toArray(),
+                'documents' => Document::query()->where('title', 'like', "%$query%")->limit($limit)->get()->toArray(),
+            ];
+        }
     }
 }

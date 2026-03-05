@@ -14,7 +14,7 @@ export default function OrdersTable({ orders = [] }) {
         </thead>
         <tbody>
           {orders.map((order) => (
-            <tr key={order.id} className="border-t">
+            <tr key={order.id} className="border-t transition-colors hover:bg-indigo-50">
               <td className="px-4 py-2">{order.id}</td>
               <td className="px-4 py-2">{order.status}</td>
               <td className="px-4 py-2">{order.total}</td>

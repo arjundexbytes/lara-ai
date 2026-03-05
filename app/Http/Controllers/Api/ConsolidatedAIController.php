@@ -11,6 +11,10 @@ use App\Services\Query\AIQueryExecutor;
 use App\Services\Query\AIQueryParser;
 use App\Services\Serialization\ApiResponseFormatter;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
+use Throwable;
+use Illuminate\Validation\ValidationException;
 
 class ConsolidatedAIController extends Controller
 {
@@ -24,6 +28,7 @@ class ConsolidatedAIController extends Controller
 
     public function query(AIQueryRequest $request): JsonResponse
     {
+        $startedAt = microtime(true);
         $intent = new AIIntentDTO(
             query: $request->string('query')->value(),
             format: $request->string('format', 'json')->value(),
@@ -31,11 +36,57 @@ class ConsolidatedAIController extends Controller
             userId: (int) $request->user()->getAuthIdentifier(),
         );
 
-        $this->abuseDetectionService->assertSafe($intent);
-        $parsed = $this->queryParser->parse($intent, $request->validated());
-        $result = $this->queryExecutor->execute($parsed, $request->user());
-        $result['cost'] = $this->costService->estimate($intent, $result);
+        try {
+            $this->abuseDetectionService->assertSafe($intent);
+            $this->enforcePlanQueryLimit($request->user());
+            $parsed = $this->queryParser->parse($intent, $request->validated());
+            $result = $this->queryExecutor->execute($parsed, $request->user());
+            $result['cost'] = $this->costService->estimate($intent, $result);
 
-        return $this->responseFormatter->json($result, $intent->format);
+            $this->trackMetrics($startedAt, false);
+
+            return $this->responseFormatter->json($result, $intent->format);
+        } catch (Throwable $throwable) {
+            $this->trackMetrics($startedAt, true);
+            Log::error('AI query failed', [
+                'conversation_id' => $intent->conversationId,
+                'error' => $throwable->getMessage(),
+            ]);
+
+            return response()->json([
+                'message' => 'Unable to process AI query at this time.',
+                'conversation_id' => $intent->conversationId,
+            ], 422);
+        }
+    }
+
+
+    private function enforcePlanQueryLimit($user): void
+    {
+        $subscription = $user?->activeSubscription()->with('plan')->first();
+        $limit = (int) ($subscription?->plan?->ai_query_limit_per_day ?? 25);
+        $key = 'ai:queries:user:'.(int) $user->id.':'.now()->format('Y-m-d');
+        $used = (int) Cache::increment($key);
+        Cache::put($key, $used, now()->endOfDay());
+
+        if ($used > $limit) {
+            throw ValidationException::withMessages([
+                'query' => 'Daily AI query limit reached for your current plan.',
+            ]);
+        }
+    }
+
+    private function trackMetrics(float $startedAt, bool $isError): void
+    {
+        $latency = (microtime(true) - $startedAt) * 1000;
+        $count = (int) Cache::increment('ai:request_count:today');
+
+        if ($isError) {
+            Cache::increment('ai:error_count:today');
+        }
+
+        $currentAvg = (float) Cache::get('ai:latency_avg_ms', 0);
+        $nextAvg = $count <= 1 ? $latency : (($currentAvg * ($count - 1)) + $latency) / $count;
+        Cache::put('ai:latency_avg_ms', round($nextAvg, 2), now()->endOfDay());
     }
 }

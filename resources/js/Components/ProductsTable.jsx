@@ -14,7 +14,7 @@ export default function ProductsTable({ products = [] }) {
         </thead>
         <tbody>
           {products.map((product) => (
-            <tr key={product.id} className="border-t">
+            <tr key={product.id} className="border-t transition-colors hover:bg-indigo-50">
               <td className="px-4 py-2">{product.name}</td>
               <td className="px-4 py-2">{product.category}</td>
               <td className="px-4 py-2">{product.price}</td>

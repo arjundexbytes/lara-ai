@@ -12,22 +12,25 @@ class OrderSeeder extends Seeder
 {
     public function run(): void
     {
-        $user = User::query()->first();
-        $products = Product::query()->take(2)->get();
+        $users = User::query()->get();
+        $products = Product::query()->get();
 
-        $order = Order::query()->create([
-            'user_id' => $user->id,
-            'total' => $products->sum('price'),
-            'status' => 'completed',
-        ]);
-
-        foreach ($products as $product) {
-            OrderItem::query()->create([
-                'order_id' => $order->id,
-                'product_id' => $product->id,
-                'quantity' => 1,
-                'price' => $product->price,
+        foreach ($users as $index => $user) {
+            $subset = $products->slice(0, 2 + ($index % 2));
+            $order = Order::query()->create([
+                'user_id' => $user->id,
+                'total' => $subset->sum('price'),
+                'status' => $index % 2 === 0 ? 'completed' : 'processing',
             ]);
+
+            foreach ($subset as $product) {
+                OrderItem::query()->create([
+                    'order_id' => $order->id,
+                    'product_id' => $product->id,
+                    'quantity' => 1,
+                    'price' => $product->price,
+                ]);
+            }
         }
     }
 }

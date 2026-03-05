@@ -1,9 +1,13 @@
 <?php
 
 use App\Http\Middleware\HardenedCorsMiddleware;
+use App\Http\Middleware\AutoLogoutOnIdleMiddleware;
 use App\Http\Middleware\RolePermissionMiddleware;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Middleware;
+use Spatie\Permission\Middleware\PermissionMiddleware;
+use Spatie\Permission\Middleware\RoleMiddleware;
+use Spatie\Permission\Middleware\RoleOrPermissionMiddleware;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -13,8 +17,12 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([
             'role.permission' => RolePermissionMiddleware::class,
+            'role' => RoleMiddleware::class,
+            'permission' => PermissionMiddleware::class,
+            'role_or_permission' => RoleOrPermissionMiddleware::class,
         ]);
 
         $middleware->append(HardenedCorsMiddleware::class);
+        $middleware->append(AutoLogoutOnIdleMiddleware::class);
     })
     ->create();

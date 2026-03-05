@@ -7,6 +7,7 @@ use Database\Seeders\Samples\ChatSeeder;
 use Database\Seeders\Samples\OrderSeeder;
 use Database\Seeders\Samples\ProductSeeder;
 use Database\Seeders\Samples\UserSeeder;
+use Database\Seeders\Samples\PlanSeeder;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
@@ -18,17 +19,26 @@ class DatabaseSeeder extends Seeder
             ProductSeeder::class,
             OrderSeeder::class,
             ChatSeeder::class,
+            PlanSeeder::class,
         ]);
 
         Document::query()->insert([
             [
                 'title' => 'Enterprise AI Policy',
                 'content' => 'All AI requests require RAG context and permission checks.',
+                'file_type' => 'document',
                 'embedding' => [0.1, 0.5, 0.3],
             ],
             [
-                'title' => 'Order SLA Handbook',
-                'content' => 'Order processing SLA is 24 hours for premium accounts.',
+                'title' => 'Support Call Recording Summary',
+                'content' => 'Audio transcript summary for escalation handling.',
+                'file_type' => 'audio',
+                'embedding' => [0.4, 0.2, 0.8],
+            ],
+            [
+                'title' => 'Product Launch Walkthrough',
+                'content' => 'Video script and highlights for product launch.',
+                'file_type' => 'video',
                 'embedding' => [0.9, 0.4, 0.2],
             ],
         ]);
