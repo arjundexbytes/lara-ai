@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Middleware\HardenedCorsMiddleware;
+use App\Http\Middleware\AutoLogoutOnIdleMiddleware;
 use App\Http\Middleware\RolePermissionMiddleware;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -22,5 +23,6 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
 
         $middleware->append(HardenedCorsMiddleware::class);
+        $middleware->append(AutoLogoutOnIdleMiddleware::class);
     })
     ->create();

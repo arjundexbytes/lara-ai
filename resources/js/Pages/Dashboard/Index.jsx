@@ -57,6 +57,9 @@ export default function DashboardIndex() {
         <div className="mb-2 flex gap-2">
           <Badge tone="info">Latency: {payload.metrics.avg_ai_latency_ms}ms</Badge>
           <Badge tone={payload.metrics.system_health === 'healthy' ? 'success' : 'warning'}>Health: {payload.metrics.system_health}</Badge>
+          <Badge tone="info">Plan: {payload.subscription?.plan || 'Free'}</Badge>
+          <Badge tone="warning">Payment: {payload.subscription?.payment_status || 'n/a'}</Badge>
+          <Badge tone="info">Renews: {payload.subscription?.renews_at ? new Date(payload.subscription.renews_at).toLocaleDateString() : 'n/a'}</Badge>
         </div>
         <ConnectionStatusButton />
       </div>

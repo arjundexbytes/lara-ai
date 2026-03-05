@@ -8,6 +8,7 @@ use App\Models\Upload;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\ValidationException;
 
 class UploadController extends Controller
 {
@@ -32,6 +33,7 @@ class UploadController extends Controller
     public function store(UploadStoreRequest $request): JsonResponse
     {
         $file = $request->file('file');
+        $this->assertPlanUploadLimit($request, (int) $file->getSize());
         $path = $file->store('uploads', 'public');
 
         $upload = Upload::query()->create([
@@ -58,4 +60,18 @@ class UploadController extends Controller
 
         return response()->json(['deleted' => true]);
     }
+
+    private function assertPlanUploadLimit(Request $request, int $bytes): void
+    {
+        $subscription = $request->user()?->activeSubscription()->with('plan')->first();
+        $maxMb = (int) ($subscription?->plan?->max_upload_mb ?? 10);
+        $maxBytes = $maxMb * 1024 * 1024;
+
+        if ($bytes > $maxBytes) {
+            throw ValidationException::withMessages([
+                'file' => sprintf('Upload exceeds plan limit (%d MB).', $maxMb),
+            ]);
+        }
+    }
 }
+

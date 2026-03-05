@@ -21,6 +21,10 @@ class AppServiceProvider extends ServiceProvider
     {
         Gate::policy(User::class, UserPolicy::class);
 
+        RateLimiter::for('login', function (Request $request): Limit {
+            return Limit::perMinute(10)->by('login:'.$request->ip());
+        });
+
         RateLimiter::for('ai-query', function (Request $request): Limit {
             $key = $request->user()?->getAuthIdentifier() ?: $request->ip();
 

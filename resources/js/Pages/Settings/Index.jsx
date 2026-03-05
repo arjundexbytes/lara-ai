@@ -56,10 +56,12 @@ export default function SettingsIndex() {
 
   return (
     <AppLayout title="Settings">
-      <div className="mb-3 flex gap-2">
-        <Button variant={activeTab === 'config' ? 'primary' : 'info'} onClick={() => setActiveTab('config')}>Config</Button>
-        <Button variant={activeTab === 'runtime' ? 'primary' : 'info'} onClick={() => setActiveTab('runtime')}>Runtime</Button>
-        <Button variant={activeTab === 'payment' ? 'primary' : 'info'} onClick={() => setActiveTab('payment')}>Payment/Plan</Button>
+      <div className="mb-3 flex flex-wrap gap-2">
+        {['config', 'llm', 'vectordb', 'drivers', 'campaigns', 'payment'].map((tab) => (
+          <Button key={tab} variant={activeTab === tab ? 'primary' : 'info'} onClick={() => setActiveTab(tab)}>
+            {tab === 'vectordb' ? 'VectorDB' : tab === 'llm' ? 'LLM' : tab === 'payment' ? 'Payment/Plan' : tab.charAt(0).toUpperCase() + tab.slice(1)}
+          </Button>
+        ))}
       </div>
 
       <div className="rounded border bg-white p-4">
@@ -95,7 +97,7 @@ export default function SettingsIndex() {
                   </select>
                 </label>
               </>
-            ) : activeTab === 'runtime' ? (
+            ) : ['llm', 'vectordb', 'drivers', 'campaigns'].includes(activeTab) ? (
               <>
                 <label className="grid gap-1">RAG Top K
                   <input type="number" min="1" max="20" value={form.rag_top_k} onChange={(e) => setForm((f) => ({ ...f, rag_top_k: Number(e.target.value) }))} className="rounded border px-3 py-2" />

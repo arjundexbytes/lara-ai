@@ -14,6 +14,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use Throwable;
+use Illuminate\Validation\ValidationException;
 
 class ConsolidatedAIController extends Controller
 {
@@ -37,6 +38,7 @@ class ConsolidatedAIController extends Controller
 
         try {
             $this->abuseDetectionService->assertSafe($intent);
+            $this->enforcePlanQueryLimit($request->user());
             $parsed = $this->queryParser->parse($intent, $request->validated());
             $result = $this->queryExecutor->execute($parsed, $request->user());
             $result['cost'] = $this->costService->estimate($intent, $result);
@@ -55,6 +57,22 @@ class ConsolidatedAIController extends Controller
                 'message' => 'Unable to process AI query at this time.',
                 'conversation_id' => $intent->conversationId,
             ], 422);
+        }
+    }
+
+
+    private function enforcePlanQueryLimit($user): void
+    {
+        $subscription = $user?->activeSubscription()->with('plan')->first();
+        $limit = (int) ($subscription?->plan?->ai_query_limit_per_day ?? 25);
+        $key = 'ai:queries:user:'.(int) $user->id.':'.now()->format('Y-m-d');
+        $used = (int) Cache::increment($key);
+        Cache::put($key, $used, now()->endOfDay());
+
+        if ($used > $limit) {
+            throw ValidationException::withMessages([
+                'query' => 'Daily AI query limit reached for your current plan.',
+            ]);
         }
     }
 

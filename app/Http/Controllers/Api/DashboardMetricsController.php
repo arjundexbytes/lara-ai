@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Chat;
 use App\Models\Order;
+use App\Models\PaymentLog;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Cache;
 
@@ -20,6 +21,12 @@ class DashboardMetricsController extends Controller
             $errors = (int) Cache::get('ai:error_count:today', 0);
             $latency = (float) Cache::get('ai:latency_avg_ms', 0);
 
+            $subscription = auth()->user()?->activeSubscription()->with('plan')->first();
+            $latestPayment = PaymentLog::query()
+                ->where('user_id', auth()->id())
+                ->latest()
+                ->first(['status', 'currency', 'amount_cents', 'created_at']);
+
             return [
                 'metrics' => [
                     'avg_ai_latency_ms' => $latency,
@@ -29,6 +36,11 @@ class DashboardMetricsController extends Controller
                 ],
                 'latest_orders' => $latestOrders,
                 'latest_chat' => $latestChats,
+                'subscription' => [
+                    'plan' => $subscription?->plan?->name ?? 'Free',
+                    'renews_at' => $subscription?->renews_at?->toIso8601String(),
+                    'payment_status' => $latestPayment?->status ?? 'n/a',
+                ],
             ];
         });
 

@@ -4,11 +4,11 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\CheckoutSessionRequest;
+use App\Http\Requests\PaymentWebhookRequest;
 use App\Models\PaymentLog;
 use App\Models\Plan;
 use App\Models\UserSubscription;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 
 class PaymentController extends Controller
 {
@@ -19,7 +19,7 @@ class PaymentController extends Controller
 
         // Placeholder checkout token for Stripe/Mollie integration.
         return response()->json([
-            'provider' => 'stripe',
+            'provider' => config('payment.provider', 'stripe'),
             'checkout_reference' => hash('sha256', $request->user()->id.'|'.$plan->id.'|'.now()->timestamp),
             'plan' => $plan,
             'success_url' => $payload['success_url'],
@@ -27,7 +27,7 @@ class PaymentController extends Controller
         ]);
     }
 
-    public function webhook(Request $request): JsonResponse
+    public function webhook(PaymentWebhookRequest $request): JsonResponse
     {
         $event = (array) $request->input('event', []);
         $data = (array) ($event['data'] ?? []);
@@ -41,7 +41,7 @@ class PaymentController extends Controller
         PaymentLog::query()->create([
             'user_id' => $subscription?->user_id,
             'user_subscription_id' => $subscription?->id,
-            'provider' => (string) ($request->input('provider', 'stripe')),
+            'provider' => (string) ($request->input('provider', config('payment.provider', 'stripe'))),
             'event_type' => (string) ($event['type'] ?? 'unknown'),
             'provider_event_id' => (string) ($event['id'] ?? ''),
             'amount_cents' => (int) ($data['amount_cents'] ?? 0),

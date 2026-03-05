@@ -102,3 +102,7 @@ These map to conversation reliability, error rates, and AI response performance 
 - Install package: `composer require laravel/horizon`
 - Publish assets: `php artisan horizon:install`
 - Run horizon: `php artisan horizon`
+
+## Payment webhook security
+- Set `PAYMENT_WEBHOOK_SECRET` and send it in `X-Webhook-Secret` header for `/api/payments/webhook`.
+- Supported provider flags: `stripe`, `mollie` via `PAYMENT_PROVIDER`.

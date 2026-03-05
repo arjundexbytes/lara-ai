@@ -1,6 +1,9 @@
 <?php
 
 return [
+    'mfa' => [
+        'enabled' => env('MFA_ENABLED', false),
+    ],
     'provider' => env('AI_PROVIDER', 'ollama'),
     'providers' => [
         'ollama' => [
