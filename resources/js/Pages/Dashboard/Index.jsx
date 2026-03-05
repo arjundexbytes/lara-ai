@@ -1,8 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
 import ConnectionStatusButton from '@/Components/Status/ConnectionStatusButton';
 import AnimatedBarChart from '@/Components/AnimatedBarChart';
 import AppLayout from '@/Layouts/AppLayout';
+import { enterpriseApi } from '@/services/api/enterpriseApi';
+import Skeleton from '@/Components/UI/Skeleton';
+import Alert from '@/Components/UI/Alert';
+import Badge from '@/Components/UI/Badge';
 
 export default function DashboardIndex() {
   const [payload, setPayload] = useState(null);
@@ -10,9 +13,8 @@ export default function DashboardIndex() {
 
   useEffect(() => {
     let mounted = true;
-    axios
-      .get('/api/dashboard/metrics')
-      .then(({ data }) => {
+    enterpriseApi.getDashboardMetrics()
+      .then((data) => {
         if (mounted) setPayload(data);
       })
       .catch(() => {
@@ -28,8 +30,8 @@ export default function DashboardIndex() {
     return (
       <AppLayout title="Enterprise Dashboard">
         <div className="space-y-3">
-          <div className="h-20 animate-pulse rounded bg-slate-200" />
-          <div className="h-40 animate-pulse rounded bg-slate-200" />
+          <Skeleton className="h-20" />
+          <Skeleton className="h-40" />
         </div>
       </AppLayout>
     );
@@ -38,7 +40,7 @@ export default function DashboardIndex() {
   if (error) {
     return (
       <AppLayout title="Enterprise Dashboard">
-        <div className="rounded border border-red-200 bg-red-50 p-4 text-red-700">{error}</div>
+        <Alert>{error}</Alert>
       </AppLayout>
     );
   }
@@ -52,6 +54,10 @@ export default function DashboardIndex() {
   return (
     <AppLayout title="Enterprise Dashboard">
       <div className="mb-4 rounded-lg border bg-white p-4">
+        <div className="mb-2 flex gap-2">
+          <Badge tone="info">Latency: {payload.metrics.avg_ai_latency_ms}ms</Badge>
+          <Badge tone={payload.metrics.system_health === 'healthy' ? 'success' : 'warning'}>Health: {payload.metrics.system_health}</Badge>
+        </div>
         <ConnectionStatusButton />
       </div>
       <div className="grid grid-cols-1 gap-4 md:grid-cols-3">

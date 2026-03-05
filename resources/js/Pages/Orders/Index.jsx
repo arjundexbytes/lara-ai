@@ -1,8 +1,11 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import axios from 'axios';
 import OrdersTable from '@/Components/OrdersTable';
 import AnimatedBarChart from '@/Components/AnimatedBarChart';
 import AppLayout from '@/Layouts/AppLayout';
+import { enterpriseApi } from '@/services/api/enterpriseApi';
+import Skeleton from '@/Components/UI/Skeleton';
+import Alert from '@/Components/UI/Alert';
+import Button from '@/Components/UI/Button';
 
 export default function OrdersIndex() {
   const [status, setStatus] = useState('');
@@ -15,15 +18,15 @@ export default function OrdersIndex() {
     let mounted = true;
     setPayload(null);
     setError('');
-    axios.get('/api/orders', { params: { status, page } })
-      .then(({ data }) => mounted && setPayload(data))
+    enterpriseApi.getOrders({ status, page })
+      .then((data) => mounted && setPayload(data))
       .catch(() => mounted && setError('Failed to load orders.'));
     return () => { mounted = false; };
   }, [status, page]);
 
   useEffect(() => {
     let mounted = true;
-    axios.get('/api/analytics').then(({ data }) => mounted && setAnalytics(data)).catch(() => null);
+    enterpriseApi.getAnalytics().then((data) => mounted && setAnalytics(data)).catch(() => null);
     return () => { mounted = false; };
   }, []);
 
@@ -42,15 +45,15 @@ export default function OrdersIndex() {
           </select>
         </div>
         <div className="rounded border bg-white p-4">
-          {analytics ? <AnimatedBarChart data={chartData} /> : <div className="h-20 animate-pulse rounded bg-slate-200" />}
+          {analytics ? <AnimatedBarChart data={chartData} /> : <Skeleton className="h-20" />}
         </div>
       </div>
-      {error ? <div className="rounded border border-red-200 bg-red-50 p-3 text-sm text-red-700">{error}</div> : null}
-      {!payload && !error ? <div className="h-16 animate-pulse rounded bg-slate-200" /> : <OrdersTable orders={payload?.data || []} />}
+      {error ? <Alert>{error}</Alert> : null}
+      {!payload && !error ? <Skeleton /> : <OrdersTable orders={payload?.data || []} />}
       <div className="mt-3 flex gap-2">
-        <button onClick={() => setPage((p) => Math.max(1, p - 1))} className="rounded border px-3 py-1">Prev</button>
+        <Button variant="info" onClick={() => setPage((p) => Math.max(1, p - 1))}>Prev</Button>
         <span className="text-sm">Page {page}</span>
-        <button onClick={() => setPage((p) => p + 1)} className="rounded border px-3 py-1">Next</button>
+        <Button variant="info" onClick={() => setPage((p) => p + 1)}>Next</Button>
       </div>
     </AppLayout>
   );

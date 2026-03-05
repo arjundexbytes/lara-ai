@@ -1,8 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
 import AppLayout from '@/Layouts/AppLayout';
 import { useDispatch } from 'react-redux';
 import { pushNotification } from '@/store/slices/notificationSlice';
+import { enterpriseApi } from '@/services/api/enterpriseApi';
+import Button from '@/Components/UI/Button';
+import Skeleton from '@/Components/UI/Skeleton';
+import Alert from '@/Components/UI/Alert';
 
 export default function SettingsIndex() {
   const [settings, setSettings] = useState(null);
@@ -12,8 +15,8 @@ export default function SettingsIndex() {
   const dispatch = useDispatch();
 
   const load = () => {
-    axios.get('/api/settings')
-      .then(({ data }) => {
+    enterpriseApi.getSettings()
+      .then((data) => {
         setSettings(data);
         setForm({ ai_provider: data.ai_provider, vector_driver: data.vector_driver, rag_top_k: data.rag_top_k || 5 });
       })
@@ -25,7 +28,7 @@ export default function SettingsIndex() {
   const save = async () => {
     setSaving(true);
     try {
-      await axios.put('/api/settings', form);
+      await enterpriseApi.updateSettings(form);
       dispatch(pushNotification({ type: 'success', message: 'Settings saved.' }));
       load();
     } catch {
@@ -39,9 +42,9 @@ export default function SettingsIndex() {
     <AppLayout title="Settings">
       <div className="rounded border bg-white p-4">
         <h2 className="mb-2 text-lg font-semibold">AI / Vector Runtime Configuration</h2>
-        {error ? <div className="mb-2 rounded border border-red-200 bg-red-50 p-2 text-sm text-red-700">{error}</div> : null}
+        {error ? <Alert>{error}</Alert> : null}
         {!settings && !error ? (
-          <div className="h-16 animate-pulse rounded bg-slate-200" />
+          <Skeleton className="h-16" />
         ) : settings ? (
           <form className="grid gap-2 text-sm md:grid-cols-2" onSubmit={(e) => { e.preventDefault(); save(); }}>
             <label className="grid gap-1">AI Provider
@@ -63,7 +66,7 @@ export default function SettingsIndex() {
             <div>Meilisearch Host: <strong>{settings.meilisearch_host}</strong></div>
             <div>Redis Host: <strong>{settings.redis_host}</strong></div>
             <div>DB Connection: <strong>{settings.db_connection}</strong></div>
-            <button disabled={saving} type="submit" className="col-span-full rounded border bg-slate-900 px-3 py-2 text-white disabled:opacity-60">{saving ? 'Saving…' : 'Save Settings'}</button>
+            <Button loading={saving} type="submit" className="col-span-full">Save Settings</Button>
           </form>
         ) : null}
       </div>

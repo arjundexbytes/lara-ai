@@ -1,8 +1,9 @@
 import React, { useMemo, useRef, useState } from 'react';
-import axios from 'axios';
 import { useDispatch, useSelector } from 'react-redux';
 import { addMessage } from '@/store/slices/chatSlice';
 import { pushNotification } from '@/store/slices/notificationSlice';
+import { enterpriseApi } from '@/services/api/enterpriseApi';
+import Button from '@/Components/UI/Button';
 
 const quickQueries = [
   'Show completed orders by user for last 30 days',
@@ -47,7 +48,7 @@ export default function ChatInterface() {
     setLoading(true);
 
     try {
-      const { data } = await axios.post('/api/ai-v2/query', {
+      const data = await enterpriseApi.askAi({
         query,
         format: 'json',
         conversation_id: conversationId,
@@ -96,9 +97,7 @@ export default function ChatInterface() {
           placeholder="Ask for RAG summaries, aggregates, or user order insights"
           aria-label="Chat query input"
         />
-        <button disabled={loading} className="rounded bg-slate-900 px-4 py-2 text-white disabled:opacity-60" aria-busy={loading}>
-          {loading ? 'Sending...' : 'Send'}
-        </button>
+        <Button loading={loading} aria-busy={loading}>Send</Button>
       </form>
     </div>
   );

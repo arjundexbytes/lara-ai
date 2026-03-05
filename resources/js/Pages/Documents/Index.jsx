@@ -1,6 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
 import AppLayout from '@/Layouts/AppLayout';
+import { enterpriseApi } from '@/services/api/enterpriseApi';
+import Skeleton from '@/Components/UI/Skeleton';
+import Alert from '@/Components/UI/Alert';
+import Button from '@/Components/UI/Button';
 
 export default function DocumentsIndex() {
   const [items, setItems] = useState([]);
@@ -12,8 +15,8 @@ export default function DocumentsIndex() {
     let mounted = true;
     setLoading(true);
     setError('');
-    axios.get('/api/documents', { params: { file_type: type } })
-      .then(({ data }) => {
+    enterpriseApi.getDocuments({ file_type: type })
+      .then((data) => {
         if (mounted) setItems(data.data || []);
       })
       .catch(() => {
@@ -41,11 +44,11 @@ export default function DocumentsIndex() {
 
       {loading ? (
         <div className="space-y-2">
-          <div className="h-12 animate-pulse rounded bg-slate-200" />
-          <div className="h-12 animate-pulse rounded bg-slate-200" />
+          <Skeleton className="h-12" />
+          <Skeleton className="h-12" />
         </div>
       ) : error ? (
-        <div className="rounded border border-red-200 bg-red-50 p-3 text-sm text-red-700">{error}</div>
+        <Alert>{error}</Alert>
       ) : (
         <div className="grid gap-3 md:grid-cols-2">
           {items.map((doc) => (
@@ -53,7 +56,7 @@ export default function DocumentsIndex() {
               <div className="text-xs uppercase text-slate-500">{doc.file_type}</div>
               <div className="font-semibold">{doc.title}</div>
               <p className="mt-1 text-sm text-slate-600">{doc.content}</p>
-              <button className="mt-3 rounded border px-2 py-1 text-xs">AI Summarize</button>
+              <Button className="mt-3" variant="info">AI Summarize</Button>
             </div>
           ))}
         </div>

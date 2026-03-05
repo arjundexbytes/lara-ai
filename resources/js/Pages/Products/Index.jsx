@@ -1,8 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
 import ProductsTable from '@/Components/ProductsTable';
 import AnimatedBarChart from '@/Components/AnimatedBarChart';
 import AppLayout from '@/Layouts/AppLayout';
+import { enterpriseApi } from '@/services/api/enterpriseApi';
+import Skeleton from '@/Components/UI/Skeleton';
+import Alert from '@/Components/UI/Alert';
+import Button from '@/Components/UI/Button';
 
 export default function ProductsIndex() {
   const [query, setQuery] = useState('');
@@ -15,15 +18,15 @@ export default function ProductsIndex() {
     let mounted = true;
     setPayload(null);
     setError('');
-    axios.get('/api/products', { params: { q: query, page } })
-      .then(({ data }) => mounted && setPayload(data))
+    enterpriseApi.getProducts({ q: query, page })
+      .then((data) => mounted && setPayload(data))
       .catch(() => mounted && setError('Failed to load products.'));
     return () => { mounted = false; };
   }, [query, page]);
 
   useEffect(() => {
     let mounted = true;
-    axios.get('/api/analytics').then(({ data }) => mounted && setAnalytics(data)).catch(() => null);
+    enterpriseApi.getAnalytics().then((data) => mounted && setAnalytics(data)).catch(() => null);
     return () => { mounted = false; };
   }, []);
 
@@ -34,7 +37,7 @@ export default function ProductsIndex() {
       <div className="mb-4 grid gap-3 md:grid-cols-2">
         <div className="rounded border bg-white p-4">
           <div className="mb-2 font-semibold">Category Analytics</div>
-          {analytics ? <AnimatedBarChart data={chartData} /> : <div className="h-20 animate-pulse rounded bg-slate-200" />}
+          {analytics ? <AnimatedBarChart data={chartData} /> : <Skeleton className="h-20" />}
         </div>
         <div className="rounded border bg-white p-4">
           <div className="font-semibold">Product CRUD UI scaffold</div>
@@ -44,12 +47,12 @@ export default function ProductsIndex() {
       <div className="mb-4 flex gap-2">
         <input value={query} onChange={(e) => setQuery(e.target.value)} className="w-full rounded border px-3 py-2" placeholder="Search products" />
       </div>
-      {error ? <div className="rounded border border-red-200 bg-red-50 p-3 text-sm text-red-700">{error}</div> : null}
-      {!payload && !error ? <div className="h-16 animate-pulse rounded bg-slate-200" /> : <ProductsTable products={payload?.data || []} />}
+      {error ? <Alert>{error}</Alert> : null}
+      {!payload && !error ? <Skeleton /> : <ProductsTable products={payload?.data || []} />}
       <div className="mt-3 flex gap-2">
-        <button onClick={() => setPage((p) => Math.max(1, p - 1))} className="rounded border px-3 py-1">Prev</button>
+        <Button variant="info" onClick={() => setPage((p) => Math.max(1, p - 1))}>Prev</Button>
         <span className="text-sm">Page {page}</span>
-        <button onClick={() => setPage((p) => p + 1)} className="rounded border px-3 py-1">Next</button>
+        <Button variant="info" onClick={() => setPage((p) => p + 1)}>Next</Button>
       </div>
     </AppLayout>
   );
